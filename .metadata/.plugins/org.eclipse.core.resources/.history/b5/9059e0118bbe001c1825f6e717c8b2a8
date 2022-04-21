@@ -1,0 +1,19 @@
+
+#ifndef ADC_H
+#define ADC_H
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+#include "main.h"
+
+void AdcInit();
+ADC1->CR2 |= ADC_CR2_ADON;
+while(!(ADC1->SR)&(1<<ADC_SR_EOC));
+return (uint16_t)ADC1->DR & ADC_DR_DATA; AdcGet();
+
+
+#ifdef __cplusplus
+}
+#endif
+#endif

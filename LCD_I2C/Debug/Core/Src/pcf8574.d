@@ -1,5 +1,5 @@
 Core/Src/pcf8574.o: \
- D:/ViDieuKien/STM32/STM32F103/LCD_I2C/Core/Src/pcf8574.cpp \
+ D:/ViDieuKien/STM32/STM32F103_Project/LCD_I2C/Core/Src/pcf8574.cpp \
  ../Core/Inc/pcf8574.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
  ../Core/Inc/stm32f1xx_hal_conf.h \

@@ -75,8 +75,8 @@ all: main-build
 main-build: LCD_I2C.elf secondary-outputs
 
 # Tool invocations
-LCD_I2C.elf: $(OBJS) $(USER_OBJS) D:\ViDieuKien\STM32\STM32F103\LCD_I2C\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-g++ -o "LCD_I2C.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"D:\ViDieuKien\STM32\STM32F103\LCD_I2C\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="LCD_I2C.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+LCD_I2C.elf: $(OBJS) $(USER_OBJS) D:\ViDieuKien\STM32\STM32F103_Project\LCD_I2C\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-g++ -o "LCD_I2C.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"D:\ViDieuKien\STM32\STM32F103_Project\LCD_I2C\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="LCD_I2C.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

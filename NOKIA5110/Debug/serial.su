@@ -1,0 +1,3 @@
+Use/serial.cpp:6:6:void serial_init()	4	static
+Use/serial.cpp:34:6:void USART2_IRQHandler()	4	static
+Use/serial.cpp:44:1:int __io_putchar(int)	16	static

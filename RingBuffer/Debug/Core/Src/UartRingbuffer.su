@@ -1,0 +1,8 @@
+UartRingbuffer.c:38:6:Ringbuf_init	4	static
+UartRingbuffer.c:50:6:store_char	24	static
+UartRingbuffer.c:66:12:check_for	32	static
+UartRingbuffer.c:99:5:Uart_read	16	static
+UartRingbuffer.c:116:6:Uart_write	24	static
+UartRingbuffer.c:132:5:IsDataAvailable	4	static
+UartRingbuffer.c:139:6:Uart_sendstring	16	static
+UartRingbuffer.c:144:6:Uart_isr	32	static
