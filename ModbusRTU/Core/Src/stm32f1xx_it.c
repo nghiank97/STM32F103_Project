@@ -22,9 +22,7 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "mb.h"
-#include "mbport.h"
-extern uint16_t downcounter;
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -63,7 +61,14 @@ extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN EV */
-
+#include "mb.h"
+#include "mbport.h"
+extern uint16_t downcounter;
+#define _htim htim2
+#define _huart huart1
+extern void prvvTIMERExpiredISR( void );
+extern void prvvUARTTxReadyISR( void );
+extern void prvvUARTRxISR( void );
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -210,10 +215,10 @@ void SysTick_Handler(void)
 void TIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM2_IRQn 0 */
-  if(__HAL_TIM_GET_FLAG(&htim2, TIM_FLAG_UPDATE) != RESET && __HAL_TIM_GET_IT_SOURCE(&htim2, TIM_IT_UPDATE) !=RESET) {
-	  __HAL_TIM_CLEAR_IT(&htim2, TIM_IT_UPDATE);
+  if(__HAL_TIM_GET_FLAG(&_htim, TIM_FLAG_UPDATE) != RESET && __HAL_TIM_GET_IT_SOURCE(&_htim, TIM_IT_UPDATE) !=RESET) {
+	  __HAL_TIM_CLEAR_IT(&_htim, TIM_IT_UPDATE);
 	  if (!--downcounter)
-		  pxMBPortCBTimerExpired();
+		  prvvTIMERExpiredISR();
   }
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
@@ -228,19 +233,7 @@ void TIM2_IRQHandler(void)
 void TIM4_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM4_IRQn 0 */
-  uint32_t tmp_flag = __HAL_UART_GET_FLAG(&huart1, UART_FLAG_RXNE);
-  uint32_t tmp_it_source = __HAL_UART_GET_IT_SOURCE(&huart1, UART_IT_RXNE);
 
-  if((tmp_flag != RESET) && (tmp_it_source != RESET)) {
-    pxMBFrameCBByteReceived();
-    __HAL_UART_CLEAR_PEFLAG(&huart1);
-    return;
-  }
-
-  if((__HAL_UART_GET_FLAG(&huart1, UART_FLAG_TXE) != RESET) &&(__HAL_UART_GET_IT_SOURCE(&huart1, UART_IT_TXE) != RESET)) {
-    pxMBFrameCBTransmitterEmpty();
-    return ;
-  }
   /* USER CODE END TIM4_IRQn 0 */
   HAL_TIM_IRQHandler(&htim4);
   /* USER CODE BEGIN TIM4_IRQn 1 */
@@ -254,11 +247,16 @@ void TIM4_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-//
+  if((__HAL_UART_GET_FLAG(&_huart, UART_FLAG_RXNE) != RESET) && (__HAL_UART_GET_IT_SOURCE(&_huart, UART_IT_RXNE) != RESET)) {
+	  prvvUARTRxISR();
+  }
+  if((__HAL_UART_GET_FLAG(&_huart, UART_FLAG_TXE) != RESET) && (__HAL_UART_GET_IT_SOURCE(&_huart, UART_IT_TXE) != RESET)) {
+	  prvvUARTTxReadyISR();
+  }
   /* USER CODE END USART1_IRQn 0 */
-  HAL_UART_IRQHandler(&huart1);
+  HAL_UART_IRQHandler(&_huart);
   /* USER CODE BEGIN USART1_IRQn 1 */
-//
+
   /* USER CODE END USART1_IRQn 1 */
 }
 

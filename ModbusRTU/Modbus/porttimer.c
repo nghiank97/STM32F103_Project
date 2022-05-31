@@ -27,7 +27,7 @@
 #include "mbport.h"
  
 /* ----------------------- static functions ---------------------------------*/
-//static void prvvTIMERExpiredISR( void );
+void prvvTIMERExpiredISR( void );
  
 /* -----------------------    variables     ---------------------------------*/
 extern TIM_HandleTypeDef htim2;
@@ -45,27 +45,27 @@ xMBPortTimersInit( USHORT usTim1Timerout50us )
   /* USER CODE BEGIN TIM2_Init 1 */
 
   /* USER CODE END TIM2_Init 1 */
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 71;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 49;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  _htim.Instance = TIM2;
+  _htim.Init.Prescaler = 99;
+  _htim.Init.CounterMode = TIM_COUNTERMODE_UP;
+  _htim.Init.Period = 49;
+  _htim.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  _htim.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 
   timeout = usTim1Timerout50us;
 
-  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  if (HAL_TIM_Base_Init(&_htim) != HAL_OK)
   {
     return FALSE;
   }
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  if (HAL_TIM_ConfigClockSource(&_htim, &sClockSourceConfig) != HAL_OK)
   {
 	  return FALSE;
   }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  if (HAL_TIMEx_MasterConfigSynchronization(&_htim, &sMasterConfig) != HAL_OK)
   {
 	  return FALSE;
   }
@@ -91,10 +91,10 @@ vMBPortTimersDisable(  )
 /* Create an ISR which is called whenever the timer has expired. This function
 * must then call pxMBPortCBTimerExpired( ) to notify the protocol stack that
 * the timer has expired.
+*/
 
-static void prvvTIMERExpiredISR(void)
+void prvvTIMERExpiredISR(void)
 {
 	pxMBPortCBTimerExpired() ;
 }
 
-*/

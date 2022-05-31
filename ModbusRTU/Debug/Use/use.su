@@ -1,8 +1,0 @@
-use.cpp:28:6:void setup()	16	static
-use.cpp:43:6:void loop()	8	static
-use.cpp:48:1:eMBErrorCode eMBRegInputCB(UCHAR*, USHORT, USHORT)	24	static
-use.cpp:74:1:eMBErrorCode eMBRegHoldingCB(UCHAR*, USHORT, USHORT, eMBRegisterMode)	32	static
-use.cpp:116:1:eMBErrorCode eMBRegCoilsCB(UCHAR*, USHORT, USHORT, eMBRegisterMode)	40	static
-use.cpp:154:1:eMBErrorCode eMBRegDiscreteCB(UCHAR*, USHORT, USHORT)	32	static
-use.cpp:190:19:eMBAccessDataCode MBSetData16Bits(MB_Data_Type, USHORT, USHORT)	24	static
-use.cpp:236:19:eMBAccessDataCode MBSetData32Bits(MB_Data_Type, USHORT, ULONG)	24	static
