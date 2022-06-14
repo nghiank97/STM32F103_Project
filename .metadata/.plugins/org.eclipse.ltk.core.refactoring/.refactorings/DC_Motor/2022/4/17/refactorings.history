@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">&#x0A;<refactoring comment="Move &apos;DC_Motor&apos; to &apos;DC_Motor&apos;" description="Move &apos;DC_Motor&apos; to &apos;DC_Motor&apos;" destination="/DC_Motor" element1="Use/DC_Motor" flags="7" id="org.eclipse.ltk.core.refactoring.move.resources" resources="1" stamp="1650225738218" updateReferences="true"/>&#x0A;<refactoring comment="Rename resource &apos;DC_Motor/DC_Motor/DCMotor.cpp&apos; to &apos;DC_Motor.cpp&apos;" description="Rename resource &apos;DCMotor.cpp&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="DC_Motor/DCMotor.cpp" name="DC_Motor.cpp" stamp="1650225998332" updateReferences="true"/>
-</session>

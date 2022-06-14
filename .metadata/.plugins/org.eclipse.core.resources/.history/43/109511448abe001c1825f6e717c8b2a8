@@ -1,7 +1,0 @@
-
-#include "DC_Motor.h"
-
-
-DCMotor::DCMotor(){
-
-}

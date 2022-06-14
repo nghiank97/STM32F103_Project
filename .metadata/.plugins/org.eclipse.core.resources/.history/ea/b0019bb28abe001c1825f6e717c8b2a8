@@ -1,5 +1,0 @@
-
-#include "adc.h"
-
-void AdcInit();
-void AdcGet();
