@@ -1,0 +1,53 @@
+
+#include "use.h"
+
+extern void setup(void){
+
+	// Screen connection
+	// SCK  -> PB3
+	// A0   -> PB4
+	// SDA  -> PB5
+	// RST  -> PB6
+	// CS   -> PB7
+
+	ST7735_Init();
+	ST7735_AddrSet(0,0,159,127);
+	ST7735_Clear(0x0000);
+
+	ST7735_PutStr5x7(0,0,"Hello world!",RGB565(255,0,0));
+	ST7735_PutStr5x7(0,10,"This is 5x7 font",RGB565(0,255,0));
+	ST7735_PutStr5x7(0,20,"Screen 128x160 pixels",RGB565(0,0,255));
+
+	ST7735_Orientation(scr_normal);
+
+	InitializeLED();
+	InitializeTimer();
+	EnableTimerInterrupt(); 
+
+	
+
+	while(1) {
+//		ST7735_BigDig(2,0,35,RGB565(212,246,190));
+//		ST7735_BigDig(3,16,35,RGB565(212,246,190));
+//		ST7735_FillRect(33,42,35,44,RGB565(177,211,190));
+//		ST7735_FillRect(33,67,35,69,RGB565(177,211,190));
+//		ST7735_BigDig(4,37,35,RGB565(212,246,190));
+//		ST7735_BigDig(8,53,35,RGB565(212,246,190));
+//		ST7735_FillRect(70,42,72,44,RGB565(177,211,190));
+//		ST7735_FillRect(70,67,72,69,RGB565(177,211,190));
+//		ST7735_BigDig(5,75,35,RGB565(212,246,190));
+//		ST7735_BigDig(6,91,35,RGB565(212,246,190));
+//		ST7735_PutStr5x7(0,80,"Time:",RGB565(255,255,255));
+
+//		int timerValue = TIM_GetCounter(TIM2);
+//		if (timerValue == 400)
+//			GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_SET);
+//		else if (timerValue == 500)
+//			GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_RESET);
+
+		
+	}
+}
+extern void loop(void){
+	
+}
