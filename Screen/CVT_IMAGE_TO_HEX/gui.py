@@ -41,7 +41,7 @@ import sys
 import os
 import cv2
 
-fname = "D:\\MCU\\STM32\\STM32F103_Project\\Screen\\GUI\\the_starry_night_wallpaper.png"
+fname = "D:\\MCU\\STM32\\STM32F103_Project\\Screen\\GUI\\.png"
 
 # img = Image.open(fname)
 # if img.width != 128 or img.height != 160:
@@ -50,18 +50,17 @@ fname = "D:\\MCU\\STM32\\STM32F103_Project\\Screen\\GUI\\the_starry_night_wallpa
 img_cv = cv2.imread(fname)
 img = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
 
-s = "const uint16_t test_img_128x160[20480] = { \r\n"
+s = "const uint16_t test_img_128x160[61440] = { \r\n"
 
 for r in range(0, 160):
     for c in range(0, 128):
         (R, G, B) = img[r][c]
 
-        B = (B >> 3) & 0x1f
-        G = ((G >> 2) & 0x3f) << 5
-        R = ((R >> 3) & 0x1f) << 11
-        color565 = (B | G | R)
+        B = (B >> 2) & 0x3f
+        G = ((G >> 2) & 0x3f)
+        R = ((R >> 2) & 0x3f)
 
-        s += "0x{:04X},".format(color565)
+        s += "0x{:02X},0x{:02X},0x{:02X},".format(R,G,B)
     s += "\r"
 
 s += "};"
