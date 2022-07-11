@@ -193,10 +193,6 @@
       <pMultCmdsp></pMultCmdsp>
       <SystemViewers>
         <Entry>
-          <Name>System Viewer\GPIOA</Name>
-          <WinId>35904</WinId>
-        </Entry>
-        <Entry>
           <Name>System Viewer\TIM1</Name>
           <WinId>35905</WinId>
         </Entry>
@@ -213,7 +209,7 @@
 
   <Group>
     <GroupName>Application/MDK-ARM</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -233,7 +229,7 @@
 
   <Group>
     <GroupName>Application/User/Core</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
