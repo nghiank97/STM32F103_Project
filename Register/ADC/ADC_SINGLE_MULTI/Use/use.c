@@ -10,60 +10,85 @@ void gpio_init(void){
 }
 
 void adc_single(void){
+	
 	// 1. Enable clock GPIOA : ADC 1 PA6,PA7 ~ analog mode
 	RCC->APB2ENR |= (1<<2);
 	GPIOA->CRL &=~ 0xFF000000;
 	
 	// 2. Enable clock adc 1
 	RCC->APB2ENR |= (1<<9);
+	
 	// 3. Data Alignment RIGHT
 	ADC1->CR2 &= ~(1<<11);
+	
 	// 4. sample time : 13.5
 	ADC1->SMPR2 &=~(B111<<18);
 	ADC1->SMPR2 |= (2<<18);
 	
+	ADC1->SMPR2 &=~(B111<<21);
+	ADC1->SMPR2 |= (2<<21);
+	
 	// 5. External trigger conversion mode for regular channels
 	ADC1->CR2 |= (1<<20);
+	
 	// 6. External event select for regular group
 	ADC1->CR2 |= (B111<<17);
 	
-  // 7. Length convert = 1
+  // 7. Length convert = 2
 	ADC1->SQR1 &=~(B1111<<20);
 	ADC1->SQR1 |= (1<<20);
 	
-	// 8. Continuous conversion : singel mode
-	ADC1->CR2 |= (1<<1);
-	// 9. ADC Convert on 
+	// 8.  Discontinuous mode channel count
+	ADC1->CR1 |= (0<<13);
+	
+	// 8.  Set index
+	ADC1->SQR3 |= (6<<0);
+	ADC1->SQR3 |= (7<<5);
+	
+	// 10. Discontinuous mode on regular channels
+	ADC1->CR1 |= (1<<11);
+	// 11. Scan mode
+	ADC1->CR1 |= (1<<8);
+	
+	ADC1->CR2 |= (1<<22);
+			
+	// 12. ADC Convert on 
+	
 	ADC1->CR2 |= (1<<0);
-	HAL_Delay(100);
+	HAL_Delay(200);
 }
 
-uint16_t read_adc(uint8_t c){
-	uint16_t adc_value;
-	ADC1->SQR3 = (c<<0);
-	ADC1->DR = 0;
-	ADC1->CR2 |= (1<<22);
-	while(ADC1->SR&(1<<1));
-	adc_value = ADC1->DR;
-	return adc_value;
-}
+uint16_t adc_a[2];
 
 extern void setup(void){
 	gpio_init();
 	adc_single();
+
 }
 
 #define LED_ON() 	{GPIOC->ODR &=~ (1<<13);}
 #define LED_OFF() {GPIOC->ODR |= (1<<13);}
 #define LED_TOGGLE() {GPIOC->ODR ^= (1<<13);}
 
-uint16_t adc_a = 0;
-uint16_t adc_b = 0;
-
 extern void loop(void){
-	LED_TOGGLE();
+	
+	ADC1->CR2 &=~ (1<<0);
+	ADC1->CR2 |= (1<<0);
+	ADC1->CR2 |= (1<<22);
+	ADC1->SR = 0;
+	ADC1->DR = 0;
+	while(ADC1->SR&(1<<1));
+	adc_a[0] = ADC1->DR;
+	
 	HAL_Delay(100);
 	
-	adc_a = read_adc(6);
-	adc_b = read_adc(7);
+	ADC1->CR2 &=~ (1<<0);
+	ADC1->CR2 |= (1<<0);
+	ADC1->CR2 |= (1<<22);
+	ADC1->SR = 0;
+	ADC1->DR = 0;
+	while(ADC1->SR&(1<<1));
+	adc_a[1] = ADC1->DR;
+	
+	HAL_Delay(100);
 }

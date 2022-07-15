@@ -32,19 +32,18 @@ void adc_single(void){
 	
 	// 8. Continuous conversion : singel mode
 	ADC1->CR2 &=~ (1<<1);
-	// 9. ADC Convert on 
+	// 9. set index
+	ADC1->SQR3 |= (6<<0);
+	// 10. ADC Convert on 
 	ADC1->CR2 |= (1<<0);
 	HAL_Delay(100);
 }
 
 uint16_t read_adc(){
-	uint16_t adc_value;
-	ADC1->SQR3 |= (6<<0);
 	ADC1->DR = 0;
 	ADC1->CR2 |= (1<<22);
 	while(ADC1->SR&(1<<1));
-	adc_value = ADC1->DR;
-	return adc_value;
+	return ADC1->DR;
 }
 
 extern void setup(void){
