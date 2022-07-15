@@ -1,0 +1,25 @@
+--cpu Cortex-M3
+"pwm_center_align\startup_stm32f103xb.o"
+"pwm_center_align\main.o"
+"pwm_center_align\stm32f1xx_it.o"
+"pwm_center_align\stm32f1xx_hal_msp.o"
+"pwm_center_align\stm32f1xx_hal_timebase_tim.o"
+"pwm_center_align\stm32f1xx_hal.o"
+"pwm_center_align\stm32f1xx_hal_cortex.o"
+"pwm_center_align\stm32f1xx_hal_dma.o"
+"pwm_center_align\stm32f1xx_hal_exti.o"
+"pwm_center_align\stm32f1xx_hal_flash.o"
+"pwm_center_align\stm32f1xx_hal_flash_ex.o"
+"pwm_center_align\stm32f1xx_hal_gpio.o"
+"pwm_center_align\stm32f1xx_hal_gpio_ex.o"
+"pwm_center_align\stm32f1xx_hal_pwr.o"
+"pwm_center_align\stm32f1xx_hal_rcc.o"
+"pwm_center_align\stm32f1xx_hal_rcc_ex.o"
+"pwm_center_align\stm32f1xx_hal_tim.o"
+"pwm_center_align\stm32f1xx_hal_tim_ex.o"
+"pwm_center_align\system_stm32f1xx.o"
+"pwm_center_align\use.o"
+--strict --scatter "PWM_CENTER_ALIGN\PWM_CENTER_ALIGN.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "PWM_CENTER_ALIGN.map" -o PWM_CENTER_ALIGN\PWM_CENTER_ALIGN.axf
