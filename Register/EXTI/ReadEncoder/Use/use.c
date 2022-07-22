@@ -10,75 +10,56 @@ void gpio_init(void){
 }
 
 void encoder_init(void){
+	/* 
+		Config PB1, PB12 input pullup
+	*/
 
-//	RCC->APB2ENR |= (1<<0);
-//	
-//	AFIO->EXTICR[3] |= (B1<<0)|(B1<<4);
-//	EXTI->IMR |= (1<<12)|(1<<13);
+	RCC->APB2ENR |= (1<<3);
 
-//	EXTI->RTSR &=~ (1<<12)|(1<<13);
-//	EXTI->FTSR |= (1<<12)|(1<<13);
-//	
-//	EXTI->SWIER |= (1<<12)|(1<<13);
+	GPIOB->CRH &=~ 0x000F0000;
+	GPIOB->CRH |=  0x00080000;
 	
-//	/* 
-//		NVIC EXTI Line3 interrupt : 9
-//		9%4 = 1
-//		(9-4*1)= 5 (5-1 = 4)
-//	*/
-//	NVIC->IP[1] = (0<<4);
-//	/* 
-//		NVIC EXTI Line3 interrupt enable
-//		9/31 = 0 - 9
-//		9-31*0= 9
-//		NVIC->ISER[0] = (1<<9);
-//	*/
-//	NVIC->ISER[0] = (1<<9);
-
-//	RCC->APB2ENR |= (1<<3);
-//	GPIOB->CRL |= (8<<4);
-
-//	RCC->APB2ENR |= (1<<0);
-//	AFIO->EXTICR[0] |= (B1<<4);
-//	
-//	EXTI->IMR |= (1<<4);
-
-//	EXTI->RTSR &=~ (1<<4);
-//	EXTI->FTSR |= (1<<4);
-//		
-//	EXTI->SWIER |= (1<<4);
-
-//	NVIC_SetPriority (EXTI1_IRQn, 1);  // Set Priority
-//		
-//	NVIC_EnableIRQ (EXTI1_IRQn);  // Enable Interrupt
-
-//	/* 
-//		NVIC EXTI Line 0 interrupt : 6
-//		6%4 = 1
-//		(6-4*1)= 2-> (2)*8 = 16
-//	*/
-//	NVIC->IP[1] = (0<<16);
-//	/* 
-//		NVIC EXTI Line3 interrupt enable
-//		6/31 = 0 - 6
-//		6-31*0= 6
-//		NVIC->ISER[0] = (1<<6);
-//	*/
-//	NVIC->ISER[0] = (1<<6);
-
-	RCC->APB2ENR |= (1<<0);  // Enable AFIO CLOCK
+	GPIOB->CRL &=~ 0x000000F0;
+	GPIOB->CRL |=  0x00000080;
 	
-	AFIO->EXTICR[0] &= ~(0xf<<4);  // Bits[7:6:5:4] = (0:0:0:0)  -> configure EXTI1 line for PA1
+	/* 
+		Config PB1,PB12 external interrupt
+	*/
+	RCC->APB2ENR |= (1<<0);
+  // Configure EXTI1 line for PB1
+	AFIO->EXTICR[0] |= (1<<4);
+	// Configure EXTI1 line for PB12
+	AFIO->EXTICR[3] |= (1<<0);
+
+	// Disable the Mask on EXTI 1
+	EXTI->IMR |= (1<<1);
+	// Disable the Mask on EXTI 12
+	EXTI->IMR |= (1<<12);
 	
-	EXTI->IMR |= (1<<1);  // Bit[1] = 1  --> Disable the Mask on EXTI 1
-	
-	EXTI->RTSR &=~ (1<<1);  // Enable Rising Edge Trigger for PA1
-	
-	EXTI->FTSR |= (1<<1);  // Disable Falling Edge Trigger for PA1
-	
-	NVIC_SetPriority (EXTI1_IRQn, 1);  // Set Priority
-	
-	NVIC_EnableIRQ (EXTI1_IRQn);  // Enable Interrupt
+	// Disable Rising Edge for PB1,PB12
+	EXTI->RTSR |= (1<<1)|(1<<12);
+	// Enable Falling Edge for PB1,PB12
+	EXTI->FTSR |= (1<<1)|(1<<12);
+	/* 
+		NVIC EXTI Line 1, 12 interrupt : 7, 40
+		7/4 = 1
+		(7-4*1)= 3 -> (3)*8 = 24
+		
+		40/4 = 10
+		(40-4*10)= 0 -> (0)*8 = 0
+	*/
+	NVIC->IP[1] = (0<<24);
+	NVIC->IP[10] = (0<<0);
+	/* 
+		NVIC EXTI Line 1, 12 interrupt enable
+		7/32 = 0
+		7-31*0= 7
+		
+		40/32 = 1
+		40-32*1= 8
+	*/
+	NVIC->ISER[0] = (1<<7);
+	NVIC->ISER[1] = (1<<8);
 }
 
 extern void setup(void){
@@ -88,15 +69,33 @@ extern void setup(void){
 
 #define LED_ON() 	{GPIOC->ODR &=~ (1<<13);}
 #define LED_OFF() {GPIOC->ODR |= (1<<13);}
-
-uint16_t count = 0;
+#define READ_PIN(GPIO_PORT,GPIO_PIN) (((GPIO_PORT->IDR & (1<<GPIO_PIN)) == 0x00) ? 0:1)
+int32_t count = 0;
 
 void EXTI1_IRQHandler(void)
 {
 	if (EXTI->PR & (1<<1))
 	{
-		count += 1;
+		if ((GPIOB->IDR & (1<<11)) != 0){
+			count += 1; 
+		}
+		else{
+			count -= 1; 
+		}
 		EXTI->PR |= (1<<1);
+	}
+}
+
+void EXTI15_10_IRQHandler(void){
+	if (EXTI->PR & (1<<12))
+	{
+		if ((GPIOB->IDR & (1<<1)) == 0){
+			count += 1; 
+		}
+		else{
+			count -= 1; 
+		}
+		EXTI->PR |= (1<<12);
 	}
 }
 

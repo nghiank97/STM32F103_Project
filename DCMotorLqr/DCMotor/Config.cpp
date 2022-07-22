@@ -31,18 +31,21 @@ extern void usart_2_init(void){
 	 * 	Fclk = 72Mhz
 	 *	Baudrate : 115200
 	 */
+
 	USART2->BRR = 0x02D9;
 	USART2->CR1 |= (1<<13);   // UE = 1... Enable USART
 }
 
 extern void encoder_init(void){
-	RCC->APB2ENR |= (1<<0);  // Enable AFIO CLOCK
-	AFIO->EXTICR[0] &= ~(0xf<<4);  // Bits[7:6:5:4] = (0:0:0:0)  -> configure EXTI1 line for PA1
-	EXTI->IMR |= (1<<1);  // Bit[1] = 1  --> Disable the Mask on EXTI 1
-	EXTI->RTSR &=~ (1<<1);  // Enable Rising Edge Trigger for PA1
-	EXTI->FTSR |= (1<<1);  // Disable Falling Edge Trigger for PA1
-	NVIC_SetPriority (EXTI1_IRQn, 1);  // Set Priority
-	NVIC_EnableIRQ (EXTI1_IRQn);  // Enable Interrupt
+
+	RCC->APB2ENR |= (1<<0);  			// Enable AFIO CLOCK
+	AFIO->EXTICR[0] &= ~(0xf<<4);  		// Bits[7:6:5:4] = (0:0:0:0)  -> configure EXTI1 line for PA1
+	EXTI->IMR |= (1<<1);  				// Bit[1] = 1  --> Disable the Mask on EXTI 1
+	EXTI->RTSR &=~ (1<<1);  			// Enable Rising Edge Trigger for PA1
+	EXTI->FTSR |= (1<<1);  				// Disable Falling Edge Trigger for PA1
+	NVIC_SetPriority (EXTI1_IRQn, 1);  	// Set Priority
+	NVIC_EnableIRQ (EXTI1_IRQn);  		// Enable Interrupt
+
 }
 
 void TIM2_IRQHandler(void)

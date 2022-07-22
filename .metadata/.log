@@ -1,0 +1,19 @@
+!SESSION 2022-07-19 22:45:25.920 -----------------------------------------------
+eclipse.buildId=Version 1.10.1
+java.version=11.0.14.1
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_US
+Framework arguments:  D:\MCU\STM32F103_Project\DCMotorLqr\.project
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 D:\MCU\STM32F103_Project\DCMotorLqr\.project
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2022-07-19 22:48:04.541
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2022-07-19 22:48:04.665
+!MESSAGE Log4j initialized with config file D:\MCU\STM32F103_Project\.metadata\.log4j.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2022-07-19 22:48:11.208
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2022-07-19 22:48:23.813
+!MESSAGE Indexed 'DCMotorLqr' (23 sources, 71 headers) in 8.52 sec: 7,098 declarations; 29,512 references; 34 unresolved inclusions; 316 syntax errors; 6,096 unresolved names (14%)

@@ -33,7 +33,7 @@ void pwm_init(void){
 	TIM1->DIER |= (1<<0);
 	
 	// enable tim 1
-  TIM1->BDTR |= (1<<15)|(1<<13);
+	TIM1->BDTR |= (1<<15)|(1<<13);
 	TIM1->CR1 |= (1<<0);
 	TIM1->CCR1 = 1000;
 	
