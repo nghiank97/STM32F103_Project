@@ -1,66 +1,81 @@
 #include "Config.h"
+#include "Defaults.h"
+#include "Use.h"
+/*
+	Creating the tim use the incremental encoder
+*/
+extern void tim_incremental_encoder_init(void){
+	// Enable clock GPIOA
+	RCC->APB2ENR |= (1<<2);
+	// Alternate function PA6,PA7: tim 3 encoder
+	GPIOA->CRL &=~ 0xFF000000;
+	GPIOA->CRL |= 0x44000000;
 
-#define GPIOA_ENABLE_CLOCK() {RCC->APB2ENR |= (1<<2);}
-#define GPIOC_ENABLE_CLOCK() {RCC->APB2ENR |= (1<<4);}
-#define UART_2_ENABLE_CLOCK() {RCC->APB1ENR |= (1<<14);}
+	// 1. Enable clock tim 3
+	RCC->APB1ENR |= (1<<1);
+	// 2. Encoder mode  TI1FP1, TI2FP2
+	TIM3->SMCR |= (B011<<0);
+	// 3. TI1, TI2 select porarity : non invert
+	TIM3->CCER &=~ (1<<1)|(1<<5);
 
-#define LED_OFF() {GPIOC->ODR |= (1<<13);}
-#define LED_ON() {GPIOC->ODR &=~ (1<<13);}
-#define LED_TOGGLE() {GPIOC->ODR ^= (1<<13);}
+	TIM3->CNT = 0;
+	TIM3->PSC = 0;
+	TIM3->ARR = 0xFFFF;
 
-void debug_init(void){
-	// Enable clock GPIOC
-	GPIOC_ENABLE_CLOCK();
-
-	GPIOC->CRH &=~ 0x00F00000;
-	GPIOC->CRH |= 0x00100000;
-}
-
-extern void usart_2_init(void){
-	GPIOA_ENABLE_CLOCK();									// gpioa enable clock
-	GPIOA->CRL |= (B1010<<8)|(B1000<<12);	// pa9 - pa10 : alternate function mode
-
-	UART_2_ENABLE_CLOCK();
-
-	USART2->CR1 &=~ (1<<12);	// 8 bit
-	USART2->CR1 &=~ (1<<9);		// parity none
-	USART2->CR1 |= (1<<2); 		// RE=1.. Enable the Receiver
-	USART2->CR1 |= (1<<3);  	// TE=1.. Enable Transmitter
+	// Enable tim 3
+	TIM3->CR1 |= (1<<0);
+	// Enable interrupt tim 3
+	TIM3->DIER |= (1<<0);
 
 	/*
-	 * 	Fclk = 72Mhz
-	 *	Baudrate : 115200
-	 */
-
-	USART2->BRR = 0x02D9;
-	USART2->CR1 |= (1<<13);   // UE = 1... Enable USART
+		NVIC TIM 3 update : 29
+		29/4 = 7
+		(29-4*7)= 1-> (1)*8 = 8
+	*/
+	NVIC->IP[7] |= (1<<8);
+	/*
+		NVIC TIM 3 update : enable
+		29/31 = 0
+		29-31*0= 29
+	*/
+	NVIC->ISER[0] |= (1<<29);
 }
 
-extern void encoder_init(void){
+volatile int32_t time_of_count = 0;
+volatile int32_t count = 0;
 
-	RCC->APB2ENR |= (1<<0);  			// Enable AFIO CLOCK
-	AFIO->EXTICR[0] &= ~(0xf<<4);  		// Bits[7:6:5:4] = (0:0:0:0)  -> configure EXTI1 line for PA1
-	EXTI->IMR |= (1<<1);  				// Bit[1] = 1  --> Disable the Mask on EXTI 1
-	EXTI->RTSR &=~ (1<<1);  			// Enable Rising Edge Trigger for PA1
-	EXTI->FTSR |= (1<<1);  				// Disable Falling Edge Trigger for PA1
-	NVIC_SetPriority (EXTI1_IRQn, 1);  	// Set Priority
-	NVIC_EnableIRQ (EXTI1_IRQn);  		// Enable Interrupt
-
-}
-
-void TIM2_IRQHandler(void)
+void TIM3_IRQHandler(void)
 {
-	if (TIM2->SR & (1<<0))
-	{
+	if (TIM3->SR &(1<<0)){
+		if (TIM3->CR1 & (1<<4)){
+			time_of_count -= 1;
+		}
+		else{
+			time_of_count += 1;
+		}
 	}
+	TIM3->SR &=~ (1<<0);
 }
 
-extern void tim_2_init(void){
-	// Enable tim 2
+extern int32_t tim_encoder_get_raw_count(void){
+	count = TIM3->CNT;
+	count += time_of_count*65535;
+	return count;
+}
+
+
+
+/*
+	Creating the tim use to control the motor
+	250us - 0.25ms
+*/
+extern void tim_handle_motor_init(void){
+	// Enable tim 2 : 72MHz
 	RCC->APB1ENR |= (1<<0);
-	TIM1->CNT = 0;
-	TIM1->PSC = 0;
-	TIM1->ARR = 3599;
+	TIM2->CNT = 499;
+	TIM2->PSC = 35;
+	TIM2->ARR = 0xFFFF;
+	TIM2->CR1 |= (1<<0);
 	/*
 		NVIC TIM 2 update : 28
 		28/4 = 7
@@ -75,15 +90,24 @@ extern void tim_2_init(void){
 	NVIC->ISER[0] = (1<<3);
 }
 
-void TIM1_IRQHandler(void)
-{
-	if (TIM1->SR & (1<<0))
-	{
-		LED_TOGGLE();
-	}
+extern void tim_start_motor_handle(void){
+	TIM2->DIER |= (1<<0);
 }
 
-extern void pwm_1_init(void){
+void TIM2_IRQHandler(void)
+{
+	if (((TIM2->SR &(1<<0)) != 0) && ((TIM2->DIER &(1<<0)) != 0)){
+		motor_handle();
+	}
+	TIM2->SR &=~ (1<<0);
+}
+
+
+
+/*
+	Creating the tim pwm center-align
+*/
+extern void tim_pwm_init(void){
 	// Enable clock GPIOA : alternate function
 	RCC->APB2ENR |= (1<<2);
 	GPIOA->CRH &=~ 0x0000000F;
@@ -93,7 +117,7 @@ extern void pwm_1_init(void){
 	RCC->APB2ENR |= (1<<11);
 	TIM1->CNT = 0;
 	TIM1->PSC = 0;
-	TIM1->ARR = 3599;
+	TIM1->ARR = DEF_PWM_LIM;
 
 	// Center-aligned mode 1
 	TIM1->CR1 |= (1<<5);
@@ -103,13 +127,11 @@ extern void pwm_1_init(void){
 	// Capture/Compare 1 output polarity
 	TIM1->CCER |= (1<<0)|(1<<1);
 
-	// Capture/Compare 1 output polarity
-	TIM1->DIER |= (1<<0);
-
 	// enable tim 1
 	TIM1->BDTR |= (1<<15)|(1<<13);
 	TIM1->CR1 |= (1<<0);
-	TIM1->CCR1 = 1000;
+
+	TIM1->CCR1 = 0;
 
 	/*
 		NVIC TIM 1 update : 25
@@ -125,20 +147,79 @@ extern void pwm_1_init(void){
 	NVIC->ISER[0] = (1<<25);
 }
 
-#ifdef __GNUC__
-#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif /* __GNUC__ */
-
-/**
-  * @brief  Retargets the C library printf function to the USART.
-  * @param  None
-  * @retval None
-  */
-PUTCHAR_PROTOTYPE
-{
-	USART2->DR = (uint32_t)ch;
-	while((USART2->SR & (1<<6)) == 0);
-	return ch;
+extern void tim_pwm_set_value(uint16_t pwm){
+	if (pwm < 0){
+		pwm = 0;
+	}
+	if (pwm > DEF_PWM_LIM){
+		pwm = DEF_PWM_LIM;
+	}
+	TIM1->CCR1 = pwm;
 }
+
+extern void tim_start_get_adc(void){
+	// Update interrupt
+	TIM1->DIER |= (1<<0);
+}
+
+void TIM1_IRQHandler(void)
+{
+	if (((TIM1->SR & (1<<0)) != 0) && ((TIM1->DIER &(1<<0)) != 0)){
+		pwm_trig_adc_cb();
+	}
+	TIM1->SR &=~ (1<<0);
+}
+
+
+extern void drive_init(void){
+	// Enable clock GPIOA : PA9, PA10
+	RCC->APB2ENR |= (1<<2);
+	GPIOA->CRH &=~ 0x00000FF0;
+	GPIOA->CRH |= 0x00000660;
+}
+
+
+extern void adc_init(void){
+	// 1. Enable clock GPIOA : ADC 1 PA3
+	RCC->APB2ENR |= (1<<2);
+	GPIOA->CRL &=~ 0x0000F000;
+	// 2. Enable clock adc 1
+	RCC->APB2ENR |= (1<<9);
+	// 3. Data Alignment RIGHT
+	ADC1->CR2 &= ~(1<<11);
+	// 4. sample time : 13.5
+	ADC1->SMPR2 &=~(B111<<9);
+	ADC1->SMPR2 |= (2<<9);
+
+	// 5. External trigger conversion mode for regular channels
+	ADC1->CR2 |= (1<<20);
+	// 6. External event select for regular group
+	ADC1->CR2 |= (B111<<17);
+
+  // 7. Length convert = 1
+	ADC1->SQR1 &=~(B1111<<20);
+	ADC1->SQR1 |= (0<<20);
+
+	// 8. Continuous conversion : singel mode
+	ADC1->CR2 &=~ (1<<1);
+	// 9. set index
+	ADC1->SQR3 |= (3<<0);
+	// 10. ADC Convert on
+	ADC1->CR2 |= (1<<0);
+	HAL_Delay(100);
+}
+
+extern uint16_t read_adc(void){
+	ADC1->DR = 0;
+	ADC1->CR2 |= (1<<22);
+	while(ADC1->SR&(1<<1));
+	return ADC1->DR;
+}
+
+
+
+
+
+
+
+
