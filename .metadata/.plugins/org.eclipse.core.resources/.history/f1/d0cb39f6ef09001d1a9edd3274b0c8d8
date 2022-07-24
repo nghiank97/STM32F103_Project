@@ -1,0 +1,31 @@
+
+#ifndef _CONFIG_H
+#define _CONFIG_H
+
+#if __cplusplus
+extern "C"{
+#endif
+
+#include "main.h"
+#include "Binary.h"
+
+extern void incremental_encoder_init(void);
+extern int32_t encoder_get_raw_count(void);
+
+extern void tim_handle_motor_init(void){
+	// Enable tim 2 : 72MHz
+	RCC->APB1ENR |= (1<<0);
+	TIM1->CNT = 9999;
+	TIM1->PSC = 71;
+	TIM1->ARR = 0xFFFF;
+}
+
+extern void start_tim_motor_handle(void)
+extern void tim_pwm_init(void);
+extern void tim_pwm_set_value(int16_t pwm);
+
+#if __cplusplus
+}
+#endif
+
+#endif

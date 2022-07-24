@@ -1,0 +1,16 @@
+
+
+#ifndef ENCODER_H
+#define ENCODER_H
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+#include "Config"
+
+
+#ifdef __cplusplus
+}
+#endif
+#endif

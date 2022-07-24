@@ -1,0 +1,5 @@
+#include "L298.h"
+
+L298::L298(void){
+#ifndef L2
+}

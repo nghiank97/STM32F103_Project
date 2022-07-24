@@ -1,0 +1,11 @@
+#include "Encoder.h"
+
+Encoder::Encoder(void){
+	#ifndef ENCODER_CPR
+	#error "Don't define the encoder cpr"
+	#endif
+}
+
+void Encoder::update(void){
+
+}

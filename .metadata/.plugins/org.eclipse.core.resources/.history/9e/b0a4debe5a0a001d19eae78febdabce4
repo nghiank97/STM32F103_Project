@@ -1,0 +1,16 @@
+#include <Drive.h>
+#include "Defaults.h"
+
+Drive::Drive(void){
+#ifndef DEF_PWM_LIM
+	#error "don't define the pwm range"
+#endif
+}
+
+void Drive::setVoltage(uint16_t pwm){
+	tim_pwm_set_value(pwm);
+}
+
+void Drive::setVoltage(uint16_t pwm){
+	tim_pwm_set_value(pwm);
+}

@@ -1,0 +1,32 @@
+
+#include <stdio.h>
+#include <math.h>
+#include "DCMotor.h"
+#include "use.h"
+
+L298 drive;
+Encoder encoder;
+DCMotor dc_motor = DCMotor(&drive, &encoder);
+
+extern void setup(void){
+	dc_motor.init();
+
+	start_timer_adc_it();
+	start_timer_control_it();
+}
+
+extern void loop(void)
+{
+	bldc_motor.loop();
+}
+
+extern void motor_handle(void){
+	bldc_motor.move();
+}
+
+extern void pwm_trig_adc_cb(void)
+{
+	bldc_motor.getAdcVoltage();
+}
+
+

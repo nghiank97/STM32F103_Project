@@ -1,0 +1,25 @@
+
+
+#ifndef ENCODER_H
+#define ENCODER_H
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+#include "Config.h"
+
+class Encoder{
+public:
+	Encoder(void);
+	void update(void);
+	void getAngle(void);
+private:
+	float position = 0
+};
+
+
+#ifdef __cplusplus
+}
+#endif
+#endif
