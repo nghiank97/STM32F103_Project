@@ -4,7 +4,7 @@
  *      *** Do not modify ! ***
  *
  * Project: 'ADC_SINGLE_INTERRUPT' 
- * Target:  'ADC_SIGNLE_INTERRUPT' 
+ * Target:  'ADC_SINGLE_INTERRUPT' 
  */
 
 #ifndef RTE_COMPONENTS_H

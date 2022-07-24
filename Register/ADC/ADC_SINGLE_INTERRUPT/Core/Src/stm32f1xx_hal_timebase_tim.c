@@ -27,7 +27,6 @@
 /* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef        htim4;
 /* Private function prototypes -----------------------------------------------*/
-void TIM4_IRQHandler(void);
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -42,11 +41,14 @@ void TIM4_IRQHandler(void);
 HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
 {
   RCC_ClkInitTypeDef    clkconfig;
-  uint32_t              uwTimclock, uwAPB1Prescaler = 0U;
-
-  uint32_t              uwPrescalerValue = 0U;
+  uint32_t              uwTimclock = 0;
+  uint32_t              uwPrescalerValue = 0;
   uint32_t              pFLatency;
-  HAL_StatusTypeDef     status = HAL_OK;
+  /*Configure the TIM4 IRQ priority */
+  HAL_NVIC_SetPriority(TIM4_IRQn, TickPriority ,0);
+
+  /* Enable the TIM4 global Interrupt */
+  HAL_NVIC_EnableIRQ(TIM4_IRQn);
 
   /* Enable TIM4 clock */
   __HAL_RCC_TIM4_CLK_ENABLE();
@@ -54,18 +56,8 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
   /* Get clock configuration */
   HAL_RCC_GetClockConfig(&clkconfig, &pFLatency);
 
-  /* Get APB1 prescaler */
-  uwAPB1Prescaler = clkconfig.APB1CLKDivider;
   /* Compute TIM4 clock */
-  if (uwAPB1Prescaler == RCC_HCLK_DIV1)
-  {
-    uwTimclock = HAL_RCC_GetPCLK1Freq();
-  }
-  else
-  {
-    uwTimclock = 2UL * HAL_RCC_GetPCLK1Freq();
-  }
-
+  uwTimclock = 2*HAL_RCC_GetPCLK1Freq();
   /* Compute the prescaler value to have TIM4 counter clock equal to 1MHz */
   uwPrescalerValue = (uint32_t) ((uwTimclock / 1000000U) - 1U);
 
@@ -82,33 +74,15 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
   htim4.Init.Prescaler = uwPrescalerValue;
   htim4.Init.ClockDivision = 0;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 
-  status = HAL_TIM_Base_Init(&htim4);
-  if (status == HAL_OK)
+  if(HAL_TIM_Base_Init(&htim4) == HAL_OK)
   {
     /* Start the TIM time Base generation in interrupt mode */
-    status = HAL_TIM_Base_Start_IT(&htim4);
-    if (status == HAL_OK)
-    {
-    /* Enable the TIM4 global Interrupt */
-        HAL_NVIC_EnableIRQ(TIM4_IRQn);
-      /* Configure the SysTick IRQ priority */
-      if (TickPriority < (1UL << __NVIC_PRIO_BITS))
-      {
-        /* Configure the TIM IRQ priority */
-        HAL_NVIC_SetPriority(TIM4_IRQn, TickPriority, 0U);
-        uwTickPrio = TickPriority;
-      }
-      else
-      {
-        status = HAL_ERROR;
-      }
-    }
+    return HAL_TIM_Base_Start_IT(&htim4);
   }
 
- /* Return function status */
-  return status;
+  /* Return function status */
+  return HAL_ERROR;
 }
 
 /**
