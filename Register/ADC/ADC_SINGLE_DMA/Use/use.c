@@ -43,7 +43,7 @@ void adc_dma(void){
   // 8. Length convert = 1
 	ADC1->SQR1 &=~(B1111<<20);
 	ADC1->SQR1 |= (0<<20);
-	// 9. Continuous conversion : singel mode
+	// 9. Continuous conversion : Continuous
 	ADC1->CR2 |= (1<<1);
 	// 10. set index
 	ADC1->SQR3 |= (6<<0);
