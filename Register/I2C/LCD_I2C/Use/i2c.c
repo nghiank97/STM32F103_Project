@@ -5,7 +5,7 @@ int16_t status;
 extern void i2c_init(void)
 {
 	/*
-	PB8, PB9:
+	PB6, PB7: SCK, SDA
 	*/
 	
 	// GPIOB clock enable
@@ -42,7 +42,7 @@ extern void i2c_write(uint8_t address, uint8_t byte)
 	status = I2C1->SR1;
 	I2C1->DR = address;
 	
-	// EV6: Received address matched
+	// EV6: ADDR = 1 : End of address transmission
 	while(! (I2C1->SR1 & (1<<1)));
 	status = I2C1->SR1;
 	status = I2C1->SR2;
