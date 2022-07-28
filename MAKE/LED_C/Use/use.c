@@ -4,9 +4,7 @@
 void gpio_init(void){
 	// Enable clock GPIOC 
 	RCC->APB2ENR |= (1<<4);
-	
-	GPIOC->CRH &=~ 0x00F00000;
-	GPIOC->CRH |= 0x00100000;
+	GPIOC->CRH |= (B0110<<20); 
 }
 
 extern void setup(void){

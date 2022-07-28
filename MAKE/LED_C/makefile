@@ -16,15 +16,27 @@ OBJ_USE = $(addprefix $(DEBUG_PATH)/, $(notdir $(USE_SOURCE:.c=.o)))
 vpath %.c $(sort $(dir $(USE_SOURCE)))
 
 $(DEBUG_PATH)/%.o: Core/Src/%.c
+	@echo --------------------------
+	@echo -----Build $<-------------
+	@echo --------------------------
 	${GCC} $< $(CORE_FLAG) -MF"$(@:%.o=%.d)" -MT"$@" -o $@
 
 $(DEBUG_PATH)/%.o: Drivers/STM32F1xx_HAL_Driver/Src/%.c
+	@echo --------------------------
+	@echo -----Build $<-------------
+	@echo --------------------------
 	${GCC} $< $(HAL_FLAG) -MF"$(@:%.o=%.d)" -MT"$@" -o $@
 
 $(DEBUG_PATH)/%.o: Core/Startup/%.s
+	@echo --------------------------
+	@echo -----Build $<-------------
+	@echo --------------------------
 	${GCC} $(STARTUP_FLAG) -MF"$(@:%.o=%.d)" -MT"$@" -o $@
 
 $(DEBUG_PATH)/%.o: Use/%.c
+	@echo --------------------------
+	@echo -----Build $<-------------
+	@echo --------------------------
 	${GPP} $< $(USE_FLAG) -MF"$(@:%.o=%.d)" -MT"$@" -o $@
 
 $(DEBUG_PATH)/$(TARGET).elf: $(OBJ_HAL) $(OBJ_CORE) $(OBJ_USE)
