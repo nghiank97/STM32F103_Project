@@ -32,31 +32,31 @@ void tim_1_init(void){
   TIM1->BDTR |= (1<<15)|(1<<13);
 	TIM1->CR1 |= (1<<0);
 	
-	TIM1->CCR1 = 1000;
+	TIM1->CCR1 = 500;
 }
 
 
 void tim2_pwm_input_mode(void){
-	RCC->APB2ENR |= (1<<2);
-	GPIOA->CRL &=~ 0x0000000F;
-	GPIOA->CRL |= 0x0000000B;
-	
 	RCC->APB1ENR |= (1<<0);
+	
+	TIM2->CNT = 0;
+	TIM2->PSC = 0;
+	TIM2->ARR = 0xFFFF;
 	
 	/* CC1 channel is configured as input, IC1 is mapped on TI1 */
 	TIM2->CCMR1 |= (B01<<0);
 	/* Capture is done on a rising edge of IC1 */
-	TIM2->CCMR2 &=~ (1<<1);
+	TIM2->CCER &=~ (1<<1);
 	
 	/* CC2 channel is configured as input, IC2 is mapped on TI1 */
 	TIM2->CCMR1 |= (B10<<8);
 	/* Capture is done on a falling edge of IC2 */
-	TIM2->CCMR2 |= (1<<5);
+	TIM2->CCER |= (1<<5);
 
 	/* Trigger selection :  TI1 Edge Detector */
-	TIM2->SMCR |= (B100<<4);
+	TIM2->SMCR |= (B101<<4);
 	/* Slave mode selection : Reset mode */
-	TIM2->SMCR |= (B100<<4);
+	TIM2->SMCR |= (B100<<0);
 
 	/* Capture 1,2 enabled */
 	TIM2->CCER |= (1<<0)|(1<<4);
