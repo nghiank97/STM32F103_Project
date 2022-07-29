@@ -42,13 +42,9 @@ BIN = $(CP) -O binary -S
  
 CPU = -mcpu=cortex-m3
 
-# fpu
-# NONE for Cortex-M0/M0+/M3
+FPU = -mfpu=fpv4-sp-d16
+FLOAT-ABI = -mfloat-abi=soft
 
-# float-abi
-
-
-# mcu
 MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 
 # macros for gcc
@@ -145,4 +141,10 @@ ST_LINK_PATH := "C:\Program Files (x86)\STMicroelectronics\STM32 ST-LINK Utility
 FIRMWARE := $(BUILD_DIR)/$(TARGET).hex
 push:
 	$(ST_LINK_PATH) -c SWD -p $(FIRMWARE) 0x08000000 0x08001474 -v -Rst -Run
-  
+
+read:
+	$(ST_LINK_PATH) -c SWD -r32 $(ADDRESS) $(LENGTH)
+
+test:
+	arm-none-eabi-objdump -s -d ./Build/Led.elf > Led.dis
+

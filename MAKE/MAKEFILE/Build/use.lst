@@ -1,0 +1,180 @@
+ARM GAS  C:\Users\Admin\AppData\Local\Temp\cc14Lu3K.s 			page 1
+
+
+   1              		.cpu cortex-m3
+   2              		.eabi_attribute 20, 1
+   3              		.eabi_attribute 21, 1
+   4              		.eabi_attribute 23, 3
+   5              		.eabi_attribute 24, 1
+   6              		.eabi_attribute 25, 1
+   7              		.eabi_attribute 26, 1
+   8              		.eabi_attribute 30, 1
+   9              		.eabi_attribute 34, 1
+  10              		.eabi_attribute 18, 4
+  11              		.file	"use.c"
+  12              		.text
+  13              	.Ltext0:
+  14              		.cfi_sections	.debug_frame
+  15              		.global	__aeabi_fadd
+  16              		.global	__aeabi_fsub
+  17              		.global	__aeabi_fmul
+  18              		.global	__aeabi_fdiv
+  19              		.section	.text.setup,"ax",%progbits
+  20              		.align	1
+  21              		.global	setup
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  25              		.fpu softvfp
+  27              	setup:
+  28              	.LFB65:
+  29              		.file 1 "Use/use.c"
+   1:Use/use.c     **** 
+   2:Use/use.c     **** #include "use.h"
+   3:Use/use.c     **** 
+   4:Use/use.c     **** volatile float a,b;
+   5:Use/use.c     **** volatile float sum, subtraction, multiplication, division;
+   6:Use/use.c     **** volatile uint32_t end;
+   7:Use/use.c     **** 
+   8:Use/use.c     **** extern void setup(void){
+  30              		.loc 1 8 0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34 0000 38B5     		push	{r3, r4, r5, lr}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 16
+  37              		.cfi_offset 3, -16
+  38              		.cfi_offset 4, -12
+  39              		.cfi_offset 5, -8
+  40              		.cfi_offset 14, -4
+   9:Use/use.c     **** 	a = 1.618;
+  41              		.loc 1 9 0
+  42 0002 114D     		ldr	r5, .L3
+  43 0004 114B     		ldr	r3, .L3+4
+  44 0006 2B60     		str	r3, [r5]	@ float
+  10:Use/use.c     **** 	b = 3.124;
+  45              		.loc 1 10 0
+  46 0008 114C     		ldr	r4, .L3+8
+  47 000a 124B     		ldr	r3, .L3+12
+  48 000c 2360     		str	r3, [r4]	@ float
+ARM GAS  C:\Users\Admin\AppData\Local\Temp\cc14Lu3K.s 			page 2
+
+
+  11:Use/use.c     **** 
+  12:Use/use.c     **** 	sum = a+ b;
+  49              		.loc 1 12 0
+  50 000e 2868     		ldr	r0, [r5]	@ float
+  51 0010 2168     		ldr	r1, [r4]	@ float
+  52 0012 FFF7FEFF 		bl	__aeabi_fadd
+  53              	.LVL0:
+  54 0016 104B     		ldr	r3, .L3+16
+  55 0018 1860     		str	r0, [r3]	@ float
+  13:Use/use.c     **** 	subtraction = a- b;
+  56              		.loc 1 13 0
+  57 001a 2868     		ldr	r0, [r5]	@ float
+  58 001c 2168     		ldr	r1, [r4]	@ float
+  59 001e FFF7FEFF 		bl	__aeabi_fsub
+  60              	.LVL1:
+  61 0022 0E4B     		ldr	r3, .L3+20
+  62 0024 1860     		str	r0, [r3]	@ float
+  14:Use/use.c     **** 	multiplication  = a* b;
+  63              		.loc 1 14 0
+  64 0026 2868     		ldr	r0, [r5]	@ float
+  65 0028 2168     		ldr	r1, [r4]	@ float
+  66 002a FFF7FEFF 		bl	__aeabi_fmul
+  67              	.LVL2:
+  68 002e 0C4B     		ldr	r3, .L3+24
+  69 0030 1860     		str	r0, [r3]	@ float
+  15:Use/use.c     **** 	division = a/ b;
+  70              		.loc 1 15 0
+  71 0032 2868     		ldr	r0, [r5]	@ float
+  72 0034 2168     		ldr	r1, [r4]	@ float
+  73 0036 FFF7FEFF 		bl	__aeabi_fdiv
+  74              	.LVL3:
+  75 003a 0A4B     		ldr	r3, .L3+28
+  76 003c 1860     		str	r0, [r3]	@ float
+  16:Use/use.c     **** 
+  17:Use/use.c     **** 	end = 0xf0f0f0f0;
+  77              		.loc 1 17 0
+  78 003e 0A4B     		ldr	r3, .L3+32
+  79 0040 4FF0F032 		mov	r2, #-252645136
+  80 0044 1A60     		str	r2, [r3]
+  18:Use/use.c     **** }
+  81              		.loc 1 18 0
+  82 0046 38BD     		pop	{r3, r4, r5, pc}
+  83              	.L4:
+  84              		.align	2
+  85              	.L3:
+  86 0048 00000000 		.word	a
+  87 004c A01ACF3F 		.word	1070537376
+  88 0050 00000000 		.word	b
+  89 0054 9EEF4740 		.word	1078456222
+  90 0058 00000000 		.word	sum
+  91 005c 00000000 		.word	subtraction
+  92 0060 00000000 		.word	multiplication
+  93 0064 00000000 		.word	division
+  94 0068 00000000 		.word	end
+  95              		.cfi_endproc
+  96              	.LFE65:
+  98              		.section	.text.loop,"ax",%progbits
+ARM GAS  C:\Users\Admin\AppData\Local\Temp\cc14Lu3K.s 			page 3
+
+
+  99              		.align	1
+ 100              		.global	loop
+ 101              		.syntax unified
+ 102              		.thumb
+ 103              		.thumb_func
+ 104              		.fpu softvfp
+ 106              	loop:
+ 107              	.LFB66:
+  19:Use/use.c     **** 
+  20:Use/use.c     **** extern void loop(void){
+ 108              		.loc 1 20 0
+ 109              		.cfi_startproc
+ 110              		@ args = 0, pretend = 0, frame = 0
+ 111              		@ frame_needed = 0, uses_anonymous_args = 0
+ 112              		@ link register save eliminated.
+  21:Use/use.c     **** }
+ 113              		.loc 1 21 0
+ 114 0000 7047     		bx	lr
+ 115              		.cfi_endproc
+ 116              	.LFE66:
+ 118              		.comm	end,4,4
+ 119              		.comm	division,4,4
+ 120              		.comm	multiplication,4,4
+ 121              		.comm	subtraction,4,4
+ 122              		.comm	sum,4,4
+ 123              		.comm	b,4,4
+ 124              		.comm	a,4,4
+ 125              		.text
+ 126              	.Letext0:
+ 127              		.file 2 "c:\\program files (x86)\\gnu tools arm embedded\\7 2018-q2-update\\arm-none-eabi\\include
+ 128              		.file 3 "c:\\program files (x86)\\gnu tools arm embedded\\7 2018-q2-update\\arm-none-eabi\\include
+ 129              		.file 4 "Drivers/CMSIS/Include/core_cm3.h"
+ 130              		.file 5 "Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h"
+ 131              		.file 6 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h"
+ARM GAS  C:\Users\Admin\AppData\Local\Temp\cc14Lu3K.s 			page 4
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 use.c
+C:\Users\Admin\AppData\Local\Temp\cc14Lu3K.s:20     .text.setup:00000000 $t
+C:\Users\Admin\AppData\Local\Temp\cc14Lu3K.s:27     .text.setup:00000000 setup
+C:\Users\Admin\AppData\Local\Temp\cc14Lu3K.s:86     .text.setup:00000048 $d
+                            *COM*:00000004 a
+                            *COM*:00000004 b
+                            *COM*:00000004 sum
+                            *COM*:00000004 subtraction
+                            *COM*:00000004 multiplication
+                            *COM*:00000004 division
+                            *COM*:00000004 end
+C:\Users\Admin\AppData\Local\Temp\cc14Lu3K.s:99     .text.loop:00000000 $t
+C:\Users\Admin\AppData\Local\Temp\cc14Lu3K.s:106    .text.loop:00000000 loop
+
+UNDEFINED SYMBOLS
+__aeabi_fadd
+__aeabi_fsub
+__aeabi_fmul
+__aeabi_fdiv
