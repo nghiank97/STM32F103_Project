@@ -475,8 +475,8 @@ ARM Macro Assembler    Page 8
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
 ork --depend=.\st7735_draw_3line\startup_stm32f103xb.d -o.\st7735_draw_3line\st
-artup_stm32f103xb.o -I.\RTE\_ST7735_DRAW_3LINE -IC:\Users\Admin\AppData\Local\A
-rm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include -IC:\Users\Admin\AppData\Local\Arm\
+artup_stm32f103xb.o -I.\RTE\_ST7735_DRAW_3LINE -IC:\Users\nghia\AppData\Local\A
+rm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include -IC:\Users\nghia\AppData\Local\Arm\
 Packs\Keil\STM32F1xx_DFP\2.4.0\Device\Include --predefine="__UVISION_VERSION SE
 TA 531" --predefine="_RTE_ SETA 1" --predefine="STM32F10X_MD SETA 1" --predefin
 e="_RTE_ SETA 1" --list=startup_stm32f103xb.lst startup_stm32f103xb.s

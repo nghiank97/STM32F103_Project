@@ -134,7 +134,7 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4101</DriverSelection>
+            <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
@@ -522,6 +522,11 @@
               <FileName>st7735_graphics.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ST7735\st7735_graphics.c</FilePath>
+            </File>
+            <File>
+              <FileName>st7735_text.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ST7735\st7735_text.c</FilePath>
             </File>
           </Files>
         </Group>

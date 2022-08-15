@@ -7,7 +7,7 @@ extern "C"{
 #endif
 
 #include "main.h"
-#include "st7735.h"
+
 
 extern void setup(void);
 extern void loop(void);

@@ -66,8 +66,8 @@ void ST7735_Init(void) {
 
 	ST7735_cmd(0x3a);   // Interface pixel format
 //	ST7735_data(0x03);  // 12-bit/pixel RGB 4-4-4 (4k colors)
-//	ST7735_data(0x05);  // 16-bit/pixel RGB 5-6-5 (65k colors)
-	ST7735_data(0x06);  // 18-bit/pixel RGB 6-6-6 (256k colors)
+	ST7735_data(0x05);  // 16-bit/pixel RGB 5-6-5 (65k colors)
+//	ST7735_data(0x06);  // 18-bit/pixel RGB 6-6-6 (256k colors)
 
 //	ST7735_cmd(0x36);   // Memory data access control:
 						//   MY MX MV ML RGB MH - -
@@ -142,30 +142,12 @@ void ST7735_AddrSet(uint16_t XS, uint16_t YS, uint16_t XE, uint16_t YE) {
 	ST7735_cmd(0x2c); // Memory write
 }
 
-//void ST7735_Clear(uint16_t color) {
-//	uint16_t i;
-//	uint8_t  CH,CL;
-
-//	CH = color >> 8;
-//	CL = (uint8_t)color;
-
-//	CS_L();
-//	ST7735_AddrSet(0,0,scr_width - 1,scr_height - 1);
-//	A0_H();
-//	for (i = 0; i < scr_width * scr_height; i++) {
-//		ST7735_write(CH);
-//		ST7735_write(CL);
-//	}
-//	CS_H();
-//}
-
 void ST7735_Clear(uint16_t color) {
 	uint16_t i;
 	CS_L();
 	ST7735_AddrSet(0,0,scr_width - 1,scr_height - 1);
 	A0_H();
 	for (i = 0; i < scr_width * scr_height; i++) {
-		ST7735_write(0x00);
 		ST7735_write(0x00);
 		ST7735_write(0x00);
 	}
