@@ -2,10 +2,39 @@
 #include "use.h"
 #include "enc28j60.h"
 
+uint8_t MAC[]= {0x08, 0x10, 0x19, 0x97, 0x25, 0x25};
+uint8_t data_packet[42]={
+	/* Destination MAC */
+	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
+	/* Source MAC */
+	0x08, 0x10, 0x19, 0x97, 0x25, 0x25,
+	/* Ethertype : ARP */
+	0x08, 0x06,
+	/* HTYPE : Ethernet */
+	0x00, 0x01,
+	/* PTYPE : IP */
+	0x80, 0x00,
+	/* HLEN */
+	0x06,
+	/* PLEN */
+	0x04,
+	/* OPER Request */
+	0x00, 0x01,
+	/* Sender MAC */
+	0x08, 0x10, 0x19, 0x97, 0x25, 0x25,
+	/* Sender IP (PC) */
+	192,168,100,8,
+	/* Target MAC */
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	/* Target IP (Router) */
+	192, 168, 100, 1
+};
+
 extern void setup(void){
-	enc28j60_init();
+	enc28j60_init(MAC);
 }
 
 extern void loop(void){
-	enc28j60_poll();
+	enc28j80_send_packet(data_packet, 42);
+	HAL_Delay(1000);
 }
