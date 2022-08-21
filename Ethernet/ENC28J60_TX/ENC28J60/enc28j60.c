@@ -2,24 +2,7 @@
 #include "config.h"
 #include "binary.h"
 #include "enc28j60.h"
-
-uint16_t rtu_crc(uint8_t buf[], uint8_t len)
-{
-  uint16_t crc = 0xFFFF;
-	int pos,i;
-  for (pos = 0; pos < len; pos++) {
-    crc ^= (uint16_t)buf[pos]; 
-    for (i = 8; i != 0; i--) {
-      if ((crc & 0x0001) != 0) {
-        crc >>= 1;
-        crc ^= 0xA001;
-      }
-      else    
-        crc >>= 1; 
-    }
-  }
-  return crc;  
-}
+#include "crc32.h"
 
 volatile BANK enc28j60_bank = BANK_NONE;
 extern void enc28j80_set_bank(BANK bank){
@@ -43,7 +26,7 @@ extern void enc28j80_write_control_res(BANK bank,uint8_t address,uint8_t data){
 }
 
 #ifdef DEBUG
-volatile uint8_t MY_MAC[]= {0};
+volatile uint8_t MY_MAC[6]= {0};
 #endif
 	
 extern void enc28j60_init(uint8_t MAC[]){
@@ -250,10 +233,12 @@ extern bool enc28j80_send_packet(uint8_t *data, uint16_t len){
 	int32_t timeout = 10000;
 	uint8_t status = 0;
 	/* Calculate CRC */
-	uint16_t crc = rtu_crc(data, len);
-	len+=2;
-	data[len] = crc%256;
-	data[len+1] = crc/256;
+	uint32_t crc = crc32(data, len);
+	data[len+3] = (uint8_t)(crc&(0xFF000000)>>24);
+	data[len+2] = (uint8_t)(crc&(0x00FF0000)>>16);
+	data[len+1] = (uint8_t)(crc&(0x0000FF00)>>8);
+	data[len] = (uint8_t)(crc&(0x000000FF));
+	len+=4;
 	
 	/* 1. Appropriately program the ETXST Pointer */
 	enc28j80_write_control_res(BANK_0, ETXSTL, TX_START_ADD%256);
@@ -290,11 +275,77 @@ extern bool enc28j80_send_packet(uint8_t *data, uint16_t len){
 }
 
 extern bool enc28j80_receive_packet(uint8_t *data, uint16_t len){
+	
 	return false;
 }
 
+uint8_t rx_buff[512] = {0};
+uint8_t rx_head = 0;
+uint16_t next_point = 0;
+uint16_t length_of_rx_buff = 0;
+
+extern void enc28j80_read_receive_buffs(uint16_t len){
+	uint16_t i = 0;
+	if (length_of_rx_buff == 0){
+		enc28j60_CS_low();
+		enc28j60_spi_write(0x3A);
+		for(i=0;i<len;i++){
+			rx_buff[rx_head] = enc28j60_spi_read();
+			
+			if (rx_head == 1){
+				next_point = rx_buff[0] + (rx_buff[1]>>8);
+			}
+			if (rx_head == 3){
+				length_of_rx_buff = rx_buff[2] + (rx_buff[3]>>8) + 4;
+			}
+			rx_head++;
+		}
+		enc28j60_CS_high();
+		printf("--------0 \r\n");
+		return;
+	}
+	else if ((rx_head + len + 4) <= length_of_rx_buff){
+		printf("--------1 \r\n");
+		enc28j60_CS_low();
+		enc28j60_spi_write(0x3A);
+		for(i=0;i<len;i++){
+			rx_buff[rx_head] = enc28j60_spi_read();
+			rx_head++;
+		}
+		enc28j60_CS_high();
+		return;
+	}
+	else if ((rx_head + len + 4) > length_of_rx_buff){
+		printf("-------- %04d %04d\r\n",(rx_head + len + 4),length_of_rx_buff);
+		return;
+	}
+}
+
+uint16_t length = 0;
+uint16_t part_length = 0;
+uint16_t tx_pointer = 0;
+
 extern void enc28j60_poll(void){
-	HAL_Delay(500);
+
+	length = enc28j80_read_control_res(BANK_1, EPKTCNT);
+//	if (length - part_length > 0){
+//		uint16_t i = 0;
+//		enc28j60_CS_low();
+//		enc28j60_spi_write(0x3A);
+//		enc28j60_spi_write(0x3A);
+//		for(i=0;i<(length - part_length);i++){
+//			rx_buff[rx_head++] = enc28j60_spi_read();
+//		}
+//		enc28j60_CS_high();
+//	}
+//	part_length = length;
+//	
+//	tx_pointer = enc28j80_read_control_res(BANK_0, ERDPTL);
+//	tx_pointer += (enc28j80_read_control_res(BANK_0, ERDPTH)>>8);
+	
+	printf("%4d %5d\r\n",length, tx_pointer);
+	
+	HAL_Delay(2000);
 }
 
 

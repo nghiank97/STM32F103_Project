@@ -46,14 +46,13 @@ typedef enum{
 #define ERXWRPTH 	0x0F  
 
 /* 0x07FF - 0x0000 */
-#define TX_SIZE					0x07FF // 1000
-#define TX_START_ADD 		0x0000
-#define TX_STOP_ADD			(TX_START_ADD+TX_SIZE)
-
-/* 0x0BFF - 0x0000 */
 #define RX_SIZE					0x07FF // 1000
-#define RX_START_ADD 		(TX_START_ADD+TX_SIZE+1)   
+#define RX_START_ADD 		0x0000
 #define RX_STOP_ADD			(RX_START_ADD+RX_SIZE)
+
+#define TX_SIZE					0x07FF // 1000
+#define TX_START_ADD 		(RX_START_ADD+RX_SIZE +1)
+#define TX_STOP_ADD			(TX_START_ADD+TX_SIZE)
 
 /* MACON1: MAC CONTROL REGISTER 1 */
 #define MACON1 		0x00
@@ -206,6 +205,9 @@ typedef enum{
 #define PKTDEC		6
 #define PWRSV			5
 #define VRPS			3
+
+#define ERXFCON 	0x18
+#define EPKTCNT 	0x19
 
 #define DEBUG
 

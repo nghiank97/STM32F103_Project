@@ -35,6 +35,5 @@ extern void setup(void){
 }
 
 extern void loop(void){
-	enc28j80_send_packet(data_packet, 42);
-	HAL_Delay(1000);
+	enc28j60_poll();
 }

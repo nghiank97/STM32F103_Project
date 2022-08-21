@@ -574,6 +574,11 @@
               <FileType>1</FileType>
               <FilePath>..\ENC28J60\enc28j60.c</FilePath>
             </File>
+            <File>
+              <FileName>crc32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ENC28J60\crc32.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
