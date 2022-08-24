@@ -2,7 +2,7 @@
 #include "config.h"
 #include "binary.h"
 #include "enc28j60.h"
-#include "crc32.h"
+#include "crc.h"
 
 volatile BANK enc28j60_bank = BANK_NONE;
 extern void enc28j80_set_bank(BANK bank){
@@ -217,17 +217,15 @@ extern bool enc28j80_write_phy(uint8_t address,uint16_t data){
 
 extern void enc28j80_write_buffs(uint8_t* data,uint16_t len){
 	uint16_t i = 0;
-	uint32_t crc = crc32(data, len);
+	uint32_t crc = crc16(&(data[6]), len);
 	enc28j60_CS_low();
 	enc28j60_spi_write(0x7A);
 	enc28j60_spi_write(0x00);
 	for(i=0;i<len;i++){
 			enc28j60_spi_write(*data++);
 	}
-	enc28j60_spi_write((crc&0xFF000000)>>24);
-	enc28j60_spi_write((crc&0x00FF0000)>>16);
-	enc28j60_spi_write((crc&0x0000FF00)>>8);
-	enc28j60_spi_write(crc&0x000000FF);
+	enc28j60_spi_write(crc&0xFF);
+	enc28j60_spi_write((crc&0xFF00)>>8);
 	enc28j60_CS_high();
 }
 

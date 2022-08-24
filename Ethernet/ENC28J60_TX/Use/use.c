@@ -3,31 +3,57 @@
 #include "enc28j60.h"
 
 uint8_t MAC[]= {0x08, 0x10, 0x19, 0x97, 0x25, 0x25};
-uint8_t data_packet[42]={
+uint8_t data_packet[58]={
 	/* Destination MAC */
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
 	/* Source MAC */
 	0x08, 0x10, 0x19, 0x97, 0x25, 0x25,
 	/* Ethertype : ARP */
 	0x08, 0x06,
-	/* HTYPE : Ethernet */
-	0x00, 0x01,
-	/* PTYPE : IP */
-	0x80, 0x00,
-	/* HLEN */
+
+	/*--------------  ARP ------------*/  
+	/* 
+	Hardware Type : HTYPE
+			Hard Addr.Length
+			Prot.Addr.Type
+	Ethernet is 1
+	*/
+	0x00,
+	0x01,
+
+	/* 
+	Protocol type (PTYPE)
+			Hard Addr.Length
+			Prot.Addr.Type
+	For IPv4, this has the value 0x0800
+	*/
+	0x08, 0x06,
+	
+	
+	/* Hardware length (HLEN) */
 	0x06,
-	/* PLEN */
+	/* Protocol length (PLEN) */
 	0x04,
-	/* OPER Request */
+	/* 
+		Operation
+			1 for request
+			2 for reply
+	*/
 	0x00, 0x01,
-	/* Sender MAC */
+	
+	/* Sender hardware address (SHA) */
 	0x08, 0x10, 0x19, 0x97, 0x25, 0x25,
-	/* Sender IP (PC) */
-	192,168,100,8,
-	/* Target MAC */
+	/* Sender protocol address (SPA) */
+	192,168,137,100,
+	/* Target hardware address (THA) */
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	/* Target IP (Router) */
-	192, 168, 100, 1
+	/* Target protocol address (TPA) */
+	192,168,137,10,
+	
+	/* Padding */
+	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+	
+	0x00,0x00,0x00,0x00,0x00,0x00
 };
 
 extern void setup(void){
@@ -35,5 +61,7 @@ extern void setup(void){
 }
 
 extern void loop(void){
-	enc28j60_poll();
+	enc28j80_send_packet(data_packet, 58);
+	//enc28j60_poll();
+	HAL_Delay(500);
 }
