@@ -6,7 +6,7 @@
 
 /* Opcode */
 #define RCR 		0x00
-#define RBM			0x20	
+#define RBM			0x3A
 #define WCR			0x40
 #define WBM			0x60
 #define BFS			0x80
@@ -211,7 +211,7 @@ typedef enum{
 
 #define DEBUG
 
-extern void enc28j60_init(uint8_t MAC[]);
+extern uint8_t enc28j60_init(uint8_t MAC[]);
 extern void enc28j80_set_bank(BANK bank);
 
 extern uint8_t enc28j80_read_control_res(BANK bank,uint8_t address);

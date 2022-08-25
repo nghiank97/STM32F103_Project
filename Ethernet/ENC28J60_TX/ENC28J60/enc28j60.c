@@ -25,18 +25,15 @@ extern void enc28j80_write_control_res(BANK bank,uint8_t address,uint8_t data){
 	enc28j60_write_cmd(WCR,address,data);
 }
 
-#ifdef DEBUG
-volatile uint8_t MY_MAC[6]= {0};
-#endif
-	
-extern void enc28j60_init(uint8_t MAC[]){
+extern uint8_t enc28j60_init(uint8_t MAC[]){
 	
 #ifdef DEBUG
 	printf("Start init ...\r\n");
 #endif
-	
+	uint8_t i = 0;
 	uint8_t status = 0;
 	int16_t timeout = 1000;
+	uint8_t MY_MAC[6]= {0};
 	enc28j60_RST_low();
 	delay_ms(1);
 	enc28j60_RST_high();
@@ -57,6 +54,7 @@ extern void enc28j60_init(uint8_t MAC[]){
 #ifdef DEBUG
 	if (timeout == -1){
 		printf("Time out \r\n");
+		return false;
 	}
 	else{
 		printf("Finish 0x%02x\r\n",status);
@@ -119,15 +117,20 @@ extern void enc28j60_init(uint8_t MAC[]){
 	enc28j80_write_control_res(BANK_3, MAADR5, MAC[4]);
 	enc28j80_write_control_res(BANK_3, MAADR6, MAC[5]);
 
-#ifdef DEBUG
 	MY_MAC[0] = enc28j80_read_control_res(BANK_3, MAADR1);
 	MY_MAC[1] = enc28j80_read_control_res(BANK_3, MAADR2);
 	MY_MAC[2] = enc28j80_read_control_res(BANK_3, MAADR3);
 	MY_MAC[3] = enc28j80_read_control_res(BANK_3, MAADR4);
 	MY_MAC[4] = enc28j80_read_control_res(BANK_3, MAADR5);
 	MY_MAC[5] = enc28j80_read_control_res(BANK_3, MAADR6);
+	
+#ifdef DEBUG
 	printf("MAC : 0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x\r\n",MY_MAC[0],MY_MAC[1],MY_MAC[2],MY_MAC[3],MY_MAC[4],MY_MAC[5]);
 #endif
+	for (i=0;i<6;i++){
+		if (MY_MAC[i] != MAC[i])
+			return false;
+	}
 
 	/* 	PHY config
 			To check PHY config, you can read a phy config address is 0x14h.
@@ -143,12 +146,13 @@ extern void enc28j60_init(uint8_t MAC[]){
 	enc28j80_write_control_res(BANK_3, ECOCON, (1<<COCON1));
 	/* Receive enable */
 	enc28j60_write_cmd(BFS, ECON1, (1<<RXEN));
-	/* Increment address when write */
+	/* Increment address when write,read */
 	enc28j60_write_cmd(BFS, ECON2, (1<<AUTOINC));
 	
 #ifdef DEBUG
 	printf("Finish !\r\n");
 #endif
+	return 1;
 }
 
 /* Read PHY config P19 */
@@ -282,68 +286,87 @@ uint8_t rx_head = 0;
 uint16_t next_point = 0;
 uint16_t length_of_rx_buff = 0;
 
+uint8_t flags = 0;
+
 extern void enc28j80_read_receive_buffs(uint16_t len){
-	uint16_t i = 0;
-	if (length_of_rx_buff == 0){
-		enc28j60_CS_low();
-		enc28j60_spi_write(0x3A);
-		for(i=0;i<len;i++){
-			rx_buff[rx_head] = enc28j60_spi_read();
-			
+	uint8_t i = 0;
+	if (flags == 1){
+		printf("Request \r\n");
+		printf("NEXT						: %04x \r\n",rx_buff[0] + (rx_buff[1]>>8));
+		printf("LENGTH					: %04x \r\n",rx_buff[2] + (rx_buff[3]>>8));
+		printf("STATUS 				2	: %04x \r\n",rx_buff[4]);
+		printf("STATUS 				3	: %04x \r\n",rx_buff[5]);
+		
+		printf("Destination MAC	: %02x %02x %02x %02x %02x %02x \r\n",rx_buff[6],rx_buff[7],rx_buff[8],rx_buff[9],rx_buff[10],rx_buff[11]);
+		printf("Source MAC			: %02x %02x %02x %02x %02x %02x \r\n",rx_buff[12],rx_buff[13],rx_buff[14],rx_buff[15],rx_buff[16],rx_buff[17]);
+		
+		printf("Ethertype				: %02x %02x \r\n",rx_buff[18], rx_buff[19]);
+		
+		printf("Hardware Type		: %02x %02x \r\n",rx_buff[20], rx_buff[21]);
+		
+		printf("Protocol type		: %02x %02x \r\n",rx_buff[22], rx_buff[23]);
+		
+		printf("Hardware length	: %02x \r\n",rx_buff[24]);
+		printf("Protocol length	: %02x \r\n",rx_buff[25]);
+		
+		printf("Operation				: %02x %02x \r\n",rx_buff[26], rx_buff[27]);
+		
+		printf("SHA							: %02x %02x %02x %02x %02x %02x \r\n",rx_buff[28],rx_buff[29],rx_buff[30],rx_buff[31],rx_buff[32],rx_buff[33]);
+		printf("SPA							: %02x %02x %02x %02x \r\n",rx_buff[34],rx_buff[35],rx_buff[36],rx_buff[37]);
+		printf("THA							: %02x %02x %02x %02x %02x %02x \r\n",rx_buff[38],rx_buff[39],rx_buff[40],rx_buff[41],rx_buff[42],rx_buff[43]);
+		printf("TPA							: %02x %02x %02x %02x \r\n",rx_buff[44],rx_buff[45],rx_buff[46],rx_buff[47]);
+
+//		printf("SHA							: %02x %02x %02x %02x %02x %02x \r\n",rx_buff[26],rx_buff[27],rx_buff[28],rx_buff[29],rx_buff[30],rx_buff[31]);
+//		printf("SPA							: %02x %02x %02x %02x \r\n",rx_buff[32],rx_buff[33],rx_buff[34],rx_buff[35]);
+//		printf("THA							: %02x %02x %02x %02x %02x %02x \r\n",rx_buff[36],rx_buff[37],rx_buff[38],rx_buff[39],rx_buff[40],rx_buff[41]);
+//		printf("TPA							: %02x %02x %02x %02x \r\n",rx_buff[42],rx_buff[43],rx_buff[44],rx_buff[45]);
+//		
+
+		printf("Head						: %04x \r\n",rx_head);
+		printf("\r\n");
+		
+		return;
+	}
+	enc28j60_CS_low();
+	enc28j60_spi_write(0x3A);
+	for(i=0;i<len;i++){
+		if (flags == 0){
+			if (rx_head > 3){
+				if(length_of_rx_buff >= 42){
+					rx_buff[rx_head] = enc28j60_spi_read();
+				}
+			}
+			else{
+				rx_buff[rx_head] = enc28j60_spi_read();
+			}
 			if (rx_head == 1){
 				next_point = rx_buff[0] + (rx_buff[1]>>8);
 			}
 			if (rx_head == 3){
-				length_of_rx_buff = rx_buff[2] + (rx_buff[3]>>8) + 4;
+				length_of_rx_buff = rx_buff[2] + (rx_buff[3]>>8);
 			}
 			rx_head++;
+			if(rx_head == (length_of_rx_buff + 6)){
+				flags = 1;
+				enc28j60_CS_high();
+			}
 		}
-		enc28j60_CS_high();
-		printf("--------0 \r\n");
-		return;
 	}
-	else if ((rx_head + len + 4) <= length_of_rx_buff){
-		printf("--------1 \r\n");
-		enc28j60_CS_low();
-		enc28j60_spi_write(0x3A);
-		for(i=0;i<len;i++){
-			rx_buff[rx_head] = enc28j60_spi_read();
-			rx_head++;
-		}
-		enc28j60_CS_high();
-		return;
-	}
-	else if ((rx_head + len + 4) > length_of_rx_buff){
-		printf("-------- %04d %04d\r\n",(rx_head + len + 4),length_of_rx_buff);
-		return;
-	}
+	enc28j60_CS_high();
 }
 
 uint16_t length = 0;
 uint16_t part_length = 0;
 uint16_t tx_pointer = 0;
-uint8_t _data = 0;
+uint8_t _data = 0; 
 
 extern void enc28j60_poll(void){
-
 	length = enc28j80_read_control_res(BANK_1, EPKTCNT);
-	if (length - part_length > 0){
-		uint16_t i = 0;
-		enc28j60_CS_low();
-		enc28j60_spi_write(0x3A);
-		for(i=0;i<(length - part_length);i++){
-			_data = enc28j60_spi_read();
-			rx_buff[rx_head++] = _data;
-			printf("%02x\r\n",_data);
-		}
-		enc28j60_CS_high();
-		
-		tx_pointer = enc28j80_read_control_res(BANK_0, ERDPTL);
-		tx_pointer += (enc28j80_read_control_res(BANK_0, ERDPTH)>>8);
-		printf("tx %04x\r\n",tx_pointer);
+	if (length > 0){
+		enc28j80_read_receive_buffs(length);
 	}
-	
-	part_length = length;
+	HAL_Delay(1000);
 }
+
 
 

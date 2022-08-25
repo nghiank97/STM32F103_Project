@@ -61,9 +61,9 @@ uint8_t arp[42]={
 	0x06, 0x04,
 	0x00, 0x01,
 	0x08, 0x10, 0x19, 0x97, 0x25, 0x25,
-	192,168,1,100,
+	192,168,137,100,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	192,168,1,2
+	192,168,137,10
 };
 
 extern void setup(void){
@@ -71,7 +71,6 @@ extern void setup(void){
 }
 
 extern void loop(void){
-	enc28j80_send_packet(arp, 42);
-	//enc28j60_poll();
-	HAL_Delay(2000);
+//	enc28j80_send_packet(arp, 42);
+	enc28j60_poll();
 }
