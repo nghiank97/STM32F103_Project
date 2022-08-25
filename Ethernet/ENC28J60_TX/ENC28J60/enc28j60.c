@@ -217,7 +217,7 @@ extern bool enc28j80_write_phy(uint8_t address,uint16_t data){
 
 extern void enc28j80_write_buffs(uint8_t* data,uint16_t len){
 	uint16_t i = 0;
-	uint32_t crc = crc32(data, len);
+	uint32_t crc = crc32(&(data[14]), 28);
 	enc28j60_CS_low();
 	enc28j60_spi_write(0x7A);
 	enc28j60_spi_write(0x00);
