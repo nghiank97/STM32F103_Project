@@ -1,5 +1,5 @@
 
-#include "config.h"
+#include "enc28j60_config.h"
 
 void enc28j60_CS_low(void){
 	HAL_GPIO_WritePin(SPI1_SS_GPIO_Port, SPI1_SS_Pin, GPIO_PIN_RESET);

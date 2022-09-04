@@ -22,7 +22,7 @@
   </DaveTm>
 
   <Target>
-    <TargetName>ARP</TargetName>
+    <TargetName>Reference</TargetName>
     <ToolsetNumber>0x4</ToolsetNumber>
     <ToolsetName>ARM-ADS</ToolsetName>
     <TargetOption>
@@ -153,7 +153,7 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>arp_data</ItemText>
+          <ItemText>UDP_Struct_Frame</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -513,8 +513,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\ENC28J60\enc28j60.c</PathWithFileName>
-      <FilenameWithoutPath>enc28j60.c</FilenameWithoutPath>
+      <PathWithFileName>..\ENC28J60\arp.c</PathWithFileName>
+      <FilenameWithoutPath>arp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -525,8 +525,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\ENC28J60\arp.c</PathWithFileName>
-      <FilenameWithoutPath>arp.c</FilenameWithoutPath>
+      <PathWithFileName>..\ENC28J60\enc28j60.c</PathWithFileName>
+      <FilenameWithoutPath>enc28j60.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -537,8 +537,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\ENC28J60\crc.c</PathWithFileName>
-      <FilenameWithoutPath>crc.c</FilenameWithoutPath>
+      <PathWithFileName>..\ENC28J60\icmp.c</PathWithFileName>
+      <FilenameWithoutPath>icmp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -549,8 +549,20 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\ENC28J60\enc28j60_config.c</PathWithFileName>
-      <FilenameWithoutPath>enc28j60_config.c</FilenameWithoutPath>
+      <PathWithFileName>..\ENC28J60\net.c</PathWithFileName>
+      <FilenameWithoutPath>net.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>6</GroupNumber>
+      <FileNumber>26</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\ENC28J60\udp.c</PathWithFileName>
+      <FilenameWithoutPath>udp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

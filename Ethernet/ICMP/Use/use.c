@@ -1,9 +1,12 @@
 
+#include <string.h>
 #include "use.h"
 #include "arp.h"
+#include "udp.h"
+#include "icmp.h"
 
-uint8_t mac_target[6] = {0x00,0x00,0x00,0x00,0x00,0x0};
-const uint8_t ip_target[6] = {192,168,137,10};
+const uint8_t ip_dest[4]={192, 168, 137, 10};
+uint8_t mac_dest[6]={0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 extern void setup(void){
 	/* Enable clock GPIOC */
@@ -11,7 +14,8 @@ extern void setup(void){
 	GPIOC->CRH &=~ 0x00F00000;
 	GPIOC->CRH |= 0x00100000;
 	
-	arp_get_mac(mac_target, ip_target);
+	arp_get_mac(mac_dest, ip_dest);
+	icmp_send_package(mac_dest, ip_dest, "abcd", 4);
 }
 
 #define LED_ON() 			{GPIOC->ODR &=~ (1<<13);}
@@ -19,5 +23,6 @@ extern void setup(void){
 #define LED_TOGGLE() 	{GPIOC->ODR ^= (1<<13);}
 
 extern void loop(void){
-	HAL_Delay(1000);
+	icmp_receive_package();
+	HAL_Delay(2000);
 }

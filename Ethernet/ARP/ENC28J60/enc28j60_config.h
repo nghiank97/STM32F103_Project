@@ -1,5 +1,5 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef ENC28J60_CONFIG_H
+#define ENC28J60_CONFIG_H
 #include "main.h"
 
 #define delay_ms(t) HAL_Delay(t)
@@ -14,4 +14,5 @@ uint8_t enc28j60_spi_read(void);
 
 extern void enc28j60_write_cmd(uint8_t opcode, uint8_t address, uint8_t data);
 extern uint8_t enc28j60_read_cmd(uint8_t opcode, uint8_t address);
+
 #endif

@@ -8,7 +8,7 @@
 #define RCR 		0x00
 #define RBM			0x3A
 #define WCR			0x40
-#define WBM			0x60
+#define WBM			0x7A
 #define BFS			0x80
 #define BFC			0xA0
 #define SRC			0xE0		
@@ -209,15 +209,18 @@ typedef enum{
 #define ERXFCON 	0x18
 #define EPKTCNT 	0x19
 
-//#define ENC28J60_EBUG
+#define ENC28J60_EBUG
 
 typedef struct{
 	uint16_t pointer_rx;
 	uint16_t len;
 	uint16_t status;
 	uint8_t rx[RX_SIZE];
+	uint8_t crc[4];
 }Enc28j60Frame;
 
+extern const uint8_t _MAC_SOURCE[6];
+extern const uint8_t _IP_SOURCE[4];
 
 extern uint8_t enc28j60_init(const uint8_t MAC[]);
 extern void enc28j60_set_bank(BANK bank);
@@ -231,8 +234,9 @@ extern uint16_t enc28j60_read_phy(uint8_t address);
 extern void enc28j60_write_buffs(uint8_t* data,uint16_t len);
 
 extern bool enc28j60_send_packet(uint8_t *data, uint16_t len);
-extern bool enc28j60_receive_packet(void);
+extern uint16_t enc28j60_receive_package(uint8_t *data);
 
 extern void enc28j60_poll(void);
 
+extern uint16_t swap16(uint16_t data);
 #endif

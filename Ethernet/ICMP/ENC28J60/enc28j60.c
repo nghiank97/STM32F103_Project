@@ -1,8 +1,12 @@
 #include <stdio.h>
+#include <string.h>
 #include "binary.h"
 #include "enc28j60.h"
 #include "enc28j60_config.h"
 #include "crc.h"
+
+const uint8_t _MAC_SOURCE[6] = {0x08,0x10,0x19,0x97,0x25,0x25};
+const uint8_t _IP_SOURCE[4] = {192,168,137,100};
 
 volatile BANK enc28j60_bank = BANK_NONE;
 extern void enc28j60_set_bank(BANK bank){
@@ -222,40 +226,61 @@ extern bool enc28j60_write_phy(uint8_t address,uint16_t data){
 
 extern void enc28j60_write_buffs(uint8_t* data,uint16_t len){
 	uint16_t i = 0;
-	uint32_t crc = crc32(data, 42);
+//	uint32_t crc = crc32(data,len);
 	enc28j60_CS_low();
-	enc28j60_spi_write(0x7A);
+	enc28j60_spi_write(WBM);
 	enc28j60_spi_write(0x00);
 	for(i=0;i<len;i++){
 			enc28j60_spi_write(*data++);
+
 	}
-	enc28j60_spi_write((crc&0xFF000000)>>24);
-	enc28j60_spi_write((crc&0x00FF0000)>>16);
-	enc28j60_spi_write((crc&0x0000FF00)>>8);
-	enc28j60_spi_write(crc&0x000000FF);
+//	enc28j60_spi_write((crc>>24)&0x000000FF);
+//	enc28j60_spi_write((crc>>16)&0x000000FF);
+//	enc28j60_spi_write((crc>>8)&0x000000FF);
+//	enc28j60_spi_write((crc>>0)&0x000000FF);
 	enc28j60_CS_high();
 }
 
 extern bool enc28j60_send_packet(uint8_t *data, uint16_t len){
-	#ifdef ENC28J60_EBUG
-		printf("Send .....\r\n");
-	#endif
+//	int32_t timeout = 10000;
+//	uint8_t status = 0;
+
+//	/* 1. Appropriately program the ETXST Pointer */
+//	enc28j60_write_control_res(BANK_0, ETXSTL, TX_START_ADD%256);
+//	enc28j60_write_control_res(BANK_0, ETXSTH, TX_START_ADD>>8);
+//	/* 2. Write data into buffer */
+//	enc28j60_write_buffs(data, len);
+//	/* 3. Appropriately program the ETXND Pointer */
+//	enc28j60_write_control_res(BANK_0, ETXNDL, (TX_START_ADD+len)%256);
+//	enc28j60_write_control_res(BANK_0, ETXNDH, (TX_START_ADD+len)>>8);
+//	/* Reset start address write */
+//	enc28j60_write_control_res(BANK_0, EWRPTL, TX_START_ADD%256);
+//	enc28j60_write_control_res(BANK_0, EWRPTH, TX_START_ADD>>8);
+//	/* 3,4 */
+//	/* 5. Start the transmission */
+//	enc28j60_write_cmd(BFS, ECON1, (1<<TXRTS));
+//	do{
+//		status = enc28j60_read_control_res(BANK_0, ECON1);
+//		// when the packet is finished or was aborted, the ECON1.TXRTS will be cleaned
+//		if((status&(1<<TXRTS)) == 0){
+//			break;
+//		}
+//	}while(timeout--);
+//	if(timeout == -1){
+//		return false;
+//	}
+//	return true;
+
 	int32_t timeout = 10000;
 	uint8_t status = 0;
-
-	/* 1. Appropriately program the ETXST Pointer */
-	enc28j60_write_control_res(BANK_0, ETXSTL, TX_START_ADD%256);
-	enc28j60_write_control_res(BANK_0, ETXSTH, TX_START_ADD>>8);
-	/* 2. Write data into buffer */
-	enc28j60_write_buffs(data, len);
-	/* 3. Appropriately program the ETXND Pointer */
-	enc28j60_write_control_res(BANK_0, ETXNDL, (TX_START_ADD+len)%256);
-	enc28j60_write_control_res(BANK_0, ETXNDH, (TX_START_ADD+len)>>8);
-	/* Reset start address write */
+	
 	enc28j60_write_control_res(BANK_0, EWRPTL, TX_START_ADD%256);
 	enc28j60_write_control_res(BANK_0, EWRPTH, TX_START_ADD>>8);
-	/* 3,4 */
-	/* 5. Start the transmission */
+	
+	enc28j60_write_control_res(BANK_0, ETXNDL, (TX_START_ADD+len)%256);
+	enc28j60_write_control_res(BANK_0, ETXNDH, (TX_START_ADD+len)>>8);
+
+	enc28j60_write_buffs(data, len);
 	enc28j60_write_cmd(BFS, ECON1, (1<<TXRTS));
 	do{
 		status = enc28j60_read_control_res(BANK_0, ECON1);
@@ -263,17 +288,75 @@ extern bool enc28j60_send_packet(uint8_t *data, uint16_t len){
 		if((status&(1<<TXRTS)) == 0){
 			break;
 		}
-//		status = enc28j60_read_control_res(BANK_0, ESTAT);
 	}while(timeout--);
 	if(timeout == -1){
-		#ifdef ENC28J60_EBUG
-			printf("Timeout %2d 0x%02x\r\n",timeout, status);
-		#endif
 		return false;
 	}
-	#ifdef ENC28J60_EBUG
-		printf("Finished ! \r\n");
-	#endif
 	return true;
 }
 
+extern uint16_t swap16(uint16_t data){
+	uint8_t h = (data>>8);
+	uint8_t l = data%256;
+	return ((l<<8) + h);
+}
+
+extern uint16_t enc28j60_receive_package(uint8_t *data){
+	static Enc28j60Frame enc28j60_frame;
+	static uint16_t part_point = 0;
+	/* Enable receive */
+	enc28j60_write_cmd(BFS, ECON1, (1<<RXEN));
+	if( enc28j60_read_control_res(BANK_1,EPKTCNT) == 0 )
+	{
+		return 0;
+	}
+	/* Set the read pointer to the start of the received packet */
+	enc28j60_write_control_res(BANK_0, ERDPTL, enc28j60_frame.pointer_rx%256);
+	enc28j60_write_control_res(BANK_0, ERDPTH, enc28j60_frame.pointer_rx>>8);
+	part_point = enc28j60_frame.pointer_rx;
+	/* read the next packet pointer */
+	enc28j60_frame.pointer_rx = enc28j60_read_cmd(RBM, 0);
+	enc28j60_frame.pointer_rx |= (enc28j60_read_cmd(RBM, 0)<<8);
+	
+	/* read the packet length (see datasheet page 43) */
+	enc28j60_frame.len = enc28j60_read_cmd(RBM, 0);
+	enc28j60_frame.len |= (enc28j60_read_cmd(RBM, 0)<<8);
+	
+	if (enc28j60_frame.len < 42){
+		return 0;
+	}
+	
+	if ((part_point + enc28j60_frame.len + 6) != enc28j60_frame.pointer_rx){
+		return 0;
+	}
+	printf("\r\nPointer : %04x\r\n",part_point);
+	printf("Pointer next: %04x\r\n",enc28j60_frame.pointer_rx);
+	printf("Len : %04x\r\n",enc28j60_frame.len);
+	
+	enc28j60_frame.len -= 4;
+	enc28j60_frame.status = enc28j60_read_cmd(RBM, 0);
+	enc28j60_frame.status |= (enc28j60_read_cmd(RBM, 0)<<8);
+	
+	
+	if (enc28j60_frame.len > (RX_SIZE-1) )
+	{
+		enc28j60_frame.len = RX_SIZE-1;
+	}
+	
+	if ((enc28j60_frame.status & 0x80)==0){
+		enc28j60_frame.len = 0;
+	}
+	else{
+		for(uint8_t i=0;i<enc28j60_frame.len;i++){
+			enc28j60_frame.rx[i] = enc28j60_read_cmd(RBM, 0);
+		}
+		for(uint8_t i=0;i<4;i++){
+			enc28j60_frame.crc[i] = enc28j60_read_cmd(RBM, 0);
+		}
+		memcpy(data, &enc28j60_frame.rx, enc28j60_frame.len);
+		enc28j60_write_cmd(BFC, ECON1, (1<<RXEN));
+		return enc28j60_frame.len;
+	}
+	enc28j60_write_cmd(BFC, ECON1, (1<<RXEN));
+	return 0;
+}
