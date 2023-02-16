@@ -21,6 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 #include "use.h"
 /* USER CODE END Includes */
 
@@ -55,7 +56,10 @@ static void MX_CAN_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+__inline int fputc(int c, FILE * stream)
+{
+ return(ITM_SendChar(c)); 
+}
 /* USER CODE END 0 */
 
 /**
@@ -88,7 +92,7 @@ int main(void)
   MX_GPIO_Init();
   MX_CAN_Init();
   /* USER CODE BEGIN 2 */
-
+	setup();
   /* USER CODE END 2 */
 
   /* Infinite loop */

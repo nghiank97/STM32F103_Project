@@ -515,7 +515,7 @@
 
 typedef enum{
     LOW = 0,
-    HIGH 1
+    HIGH = 1
 }Level;
 
 #endif

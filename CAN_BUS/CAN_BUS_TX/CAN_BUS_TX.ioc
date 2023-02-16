@@ -1,10 +1,12 @@
 #MicroXplorer Configuration settings - do not modify
+CAN.ABOM=ENABLE
+CAN.AWUM=ENABLE
 CAN.BS1=CAN_BS1_3TQ
 CAN.BS2=CAN_BS2_4TQ
 CAN.CalculateBaudRate=500000
 CAN.CalculateTimeBit=2000
 CAN.CalculateTimeQuantum=250.0
-CAN.IPParameters=CalculateTimeQuantum,CalculateTimeBit,CalculateBaudRate,BS1,BS2,Prescaler
+CAN.IPParameters=CalculateTimeQuantum,CalculateTimeBit,CalculateBaudRate,BS1,BS2,Prescaler,ABOM,AWUM
 CAN.Prescaler=9
 File.Version=6
 GPIO.groupedBy=
