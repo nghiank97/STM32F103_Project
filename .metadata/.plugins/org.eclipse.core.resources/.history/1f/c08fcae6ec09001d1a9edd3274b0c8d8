@@ -1,9 +1,0 @@
-#include "L298.h"
-
-L298::L298(void){
-#ifndef DEF_PWM_LIM
-	#error "don't define the pwm range"
-#endif
-}
-
-void L298::setVoltage(uint16_t pwm);
