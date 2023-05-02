@@ -64,4 +64,14 @@ tcp_struct.TCP_Checksums = tcp_checksum((u08*)tcp_struct.SourceIP, total_len - 2
 + -20 : len of IPv4
 + +8 : Source IP, Destination IP]
 
+## 4. Network
+
+When connect the tp link module, all device will be received ip
+
+![image info](./Image/tcp_tplink.jpg)
+
+![image info](./Image/tcp_pc.jpg)
+
+![image info](./Image/tcp_enc28j60.jpg)
+
 </span>
