@@ -17,8 +17,8 @@ void ST7735_data(uint8_t data) {
 
 uint16_t RGB565(uint8_t R,uint8_t G,uint8_t B) {
 	B = (B >> 3) & 0x1f;
-  G = ((G >> 2) & 0x3f) << 5;
-  R = ((R >> 3) & 0x1f) << 11;
+	G = ((G >> 2) & 0x3f) << 5;
+	R = ((R >> 3) & 0x1f) << 11;
 	return (uint16_t) (R | G | B);
 }
 

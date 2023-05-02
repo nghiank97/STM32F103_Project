@@ -44,14 +44,9 @@ void enc28j60ReadBuffer(u16 len, u08* data)
 		ENC28J60_CSL();
 		// issue read command
 		SPI1_ReadWrite(ENC28J60_READ_BUF_MEM);
-		while(len)
-			{
-					len--;
-					// read data
-					*data = (u08)SPI1_ReadWrite(0);
-					data++;
-			}
-		*data='\0';
+		
+		SPI1_Reads(data, len);
+		data[len] = '\0';
 		ENC28J60_CSH();
 	}
 
@@ -60,11 +55,7 @@ void enc28j60WriteBuffer(u16 len, u08* data)
 //		u32 crc = crc32(data, 42);
 		ENC28J60_CSL();
 		SPI1_ReadWrite(ENC28J60_WRITE_BUF_MEM);
-		while(len){
-			len--;
-			SPI1_ReadWrite(*data);
-			data++;
-		}
+		SPI1_Writes(data, len);
 //		SPI1_ReadWrite((crc&0xFF000000)>>24);
 //		SPI1_ReadWrite((crc&0x00FF0000)>>16);
 //		SPI1_ReadWrite((crc&0x0000FF00)>>8);
@@ -136,7 +127,6 @@ bool enc28j60Init(u08* macaddr)
   // enc28j60SetSCK();
   // enc28j60HWreset();
 	// perform system reset
-		ENC28J60_RST_H();
 	enc28j60WriteOp(ENC28J60_SOFT_RESET, 0, ENC28J60_SOFT_RESET);
 	delay_ms(250);
 	// check CLKRDY bit to see if reset is complete

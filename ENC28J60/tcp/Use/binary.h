@@ -2,6 +2,17 @@
 #ifndef BINARY_h
 #define BINARY_h
 
+#include <inttypes.h>
+#define u08 uint8_t
+#define u16 uint16_t
+#define u32 uint32_t
+
+#define i08 int8_t
+#define i16 int16_t
+#define i32 int32_t
+
+#define f32 float
+
 #define B0 0
 #define B00 0
 #define B000 0

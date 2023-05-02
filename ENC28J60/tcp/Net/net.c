@@ -41,6 +41,19 @@ extern bool net_poll(void){
 		return false;
 	}
 	else{
+		
+		
+#ifdef DEBUG
+	printf("\nReceive :");
+	for(u08 i=0;i<plen;i++){
+		if(i%16 == 0){
+			printf("\n");
+		}
+		printf("%02x ",rx_buf[i]);
+	}
+	printf("\n");
+#endif
+		
 		protocol = NONE;
 		rx_buf[plen] = '\0';
 		if(rx_buf[I_ARP_ETHERNET_TYPE_H] == 0x08 && \
@@ -56,13 +69,22 @@ extern bool net_poll(void){
 		switch (protocol){
 			case ARP:{
 				if (net_arp_check_broadcast((u08*)rx_buf, plen)){
-					net_arp_reply();
+#ifdef DEBUG
+	printf("\nARP");
+#endif
+					copy_arr(mac_pc, &rx_buf[I_ARP_MAC_SENDER], 6);
+					copy_arr(ip_pc, &rx_buf[I_ARP_IP_SENDER], 4);
+					
+					net_arp_reply((u08*)rx_buf, plen);
 					return true;
 				}
 				break;
 			}
 			case ICMP:{
 				if (net_icmp_check((u08*)rx_buf, plen)){
+#ifdef DEBUG
+	printf("\nICMP");
+#endif
 					net_icmp_reply((u08*)rx_buf, plen);
 					return true;
 				}
@@ -70,7 +92,10 @@ extern bool net_poll(void){
 			}
 			case TCP_IP:{
 				if (net_tcp_ip_check((u08*)rx_buf, plen)){
-					printf("TCP_IP \r\n");
+					
+#ifdef DEBUG
+	printf("\nTCP IP");
+#endif
 					if(net_tcp_ip_reply((u08*)rx_buf, plen)){
 						net_tcp_ip_handle((u08*)rx_buf, plen);
 						return true;
@@ -110,19 +135,19 @@ extern bool net_arp_check_broadcast(u08* ping, u16 len){
 	return true;
 }
 
-extern void net_arp_reply(void){
+extern void net_arp_reply(u08* data, u16 len){
 	ARP_Frame arp_data;
-	copy_arr(arp_data.MAC_dest, mac_pc, 6);
+	copy_arr(arp_data.MAC_dest, &data[I_ARP_MAC_SOURCE], 6);
 	copy_arr(arp_data.MAC_source, mac_addr, 6);
 	arp_data.Ethernet_type = swap16(ARP_ETHERNET_TYPE);
 	arp_data.Hardwave_type = swap16(ARP_HARDWAVE_TYPE);
 	arp_data.Protocol_type = swap16(ARP_PROTOCOL_TYPE);
 	arp_data.Size = swap16(ARP_SIZE);
-	arp_data.Opcode = swap16(ARP_OPCODE_REQUEST);
+	arp_data.Opcode = swap16(ARP_OPCODE_REPLY);
 	copy_arr(arp_data.MAC_sender, mac_addr, 6);
 	copy_arr(arp_data.IP_sender, ip_addr, 4);
-	copy_arr(arp_data.MAC_target, mac_pc, 6);
-	copy_arr(arp_data.IP_target, ip_pc, 4);
+	copy_arr(arp_data.MAC_target, &data[I_ARP_MAC_SENDER], 6);
+	copy_arr(arp_data.IP_target, &data[I_ARP_IP_SENDER], 4);
 	enc28j60PacketSend(ARP_PACKET_LEN, (u08*)&arp_data);
 }
 
@@ -167,6 +192,14 @@ extern bool net_arp_get_mac_ip_pc(u08 mac_target[6], u08 ip_target[4], u16 timeo
 					/* compare IP source */
 					if(com_arr(&data[I_ARP_IP_TARGET], (u08*)ip_addr, 4)){
 						copy_arr(mac_target, &data[I_ARP_MAC_SENDER], 6);
+						
+#ifdef DEBUG
+	printf("\nMAC :");
+	for(u08 i=0;i<6;i++){
+		printf("%02x ",mac_target[i]);
+	}
+	printf("\n");
+#endif
 						return true;
 					}
 				}
