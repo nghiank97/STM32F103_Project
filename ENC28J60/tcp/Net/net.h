@@ -88,7 +88,7 @@ extern bool net_check_enit(void);
 #define I_ARP_IP_TARGET					38
 
 typedef struct{
-	u08 MAC_dest[6];             				// MAC destination
+	u08 MAC_dest[6];             		// MAC destination
 	u08 MAC_source[6];                  // MAC source
 	u16 Ethernet_type;                 	// Ethernet type
 	
@@ -249,5 +249,18 @@ extern bool net_tcp_ip_reply(u08* request, u16 len);
 
 extern void net_tcp_ip_push_handle(u08* request, u16 len);
 extern void net_tcp_ip_handle(u08* request, u16 len);
+
+typedef struct{
+  u08 Cmd;
+  u08 Idx;
+  u08 Address[4];
+  u16 Len_RCRM;
+  u16 IRQ;
+  /* Data */
+  u08 Data[255];
+  u16 WKC;
+}EtherCATDataGram;
+
+extern void net_ethercat_send(void);
 
 #endif

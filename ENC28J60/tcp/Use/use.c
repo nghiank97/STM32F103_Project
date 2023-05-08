@@ -7,15 +7,12 @@ extern void setup_io(void){
 	GPIOC->CRH |= 0x00100000;
 }
 
-#define LED_OFF() 		{GPIOC->ODR |= (1<<13);}
-#define LED_ON() 			{GPIOC->ODR &=~ (1<<13);}
-#define LED_TOGGLE() 	{GPIOC->ODR ^= (1<<13);}
-
 int check = 0;
 
 void enc28j60IntCallBack(void){
 	if(net_check_enit() && check == 0){
-			check = 1;
+		check = 1;
+		return;
 	}
 }
 
@@ -34,4 +31,6 @@ extern void loop(void){
 		net_poll();
 		check = 0;
 	}
+	net_ethercat_send();
+	HAL_Delay(100);
 }

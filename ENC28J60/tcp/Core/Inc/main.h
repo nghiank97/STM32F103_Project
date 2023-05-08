@@ -49,6 +49,9 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+#define LED_OFF() 		{GPIOC->ODR |= (1<<13);}
+#define LED_ON() 			{GPIOC->ODR &=~ (1<<13);}
+#define LED_TOGGLE() 	{GPIOC->ODR ^= (1<<13);}
 
 /* USER CODE END ET */
 

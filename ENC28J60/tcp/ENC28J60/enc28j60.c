@@ -1,4 +1,4 @@
- 
+#include "main.h"
 #include "enc28j60.h"
 #include "spi.h"
 #include <stdio.h>
@@ -219,6 +219,7 @@ u08 enc28j60getrev(void)
 
 void enc28j60PacketSend(u16 len, u08* packet)
 	{
+		
 	// Set the write pointer to start of transmit buffer area
 	enc28j60Write(EWRPTL, TXSTART_INIT&0xFF);
 	enc28j60Write(EWRPTH, TXSTART_INIT>>8);
@@ -236,11 +237,13 @@ void enc28j60PacketSend(u16 len, u08* packet)
 	// send the contents of the transmit buffer onto the network
 	enc28j60WriteOp(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_TXRTS);
 
+		LED_OFF();
     // reset the transmit logic problem. see rev. b4 silicon errata point 12.
 	if( (enc28j60Read(EIR) & EIR_TXERIF) )
 		{
         enc28j60WriteOp(ENC28J60_BIT_FIELD_CLR, ECON1, ECON1_TXRTS);
     }
+		LED_ON();
 	}
 
 // Gets a packet from the network receive buffer, if one is available.
