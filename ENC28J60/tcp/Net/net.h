@@ -246,21 +246,33 @@ typedef struct{
 
 extern bool net_tcp_ip_check(u08* request, u16 len);
 extern bool net_tcp_ip_reply(u08* request, u16 len);
-
 extern void net_tcp_ip_push_handle(u08* request, u16 len);
 extern void net_tcp_ip_handle(u08* request, u16 len);
 
-typedef struct{
-  u08 Cmd;
-  u08 Idx;
-  u08 Address[4];
-  u16 Len_RCRM;
-  u16 IRQ;
-  /* Data */
-  u08 Data[255];
-  u16 WKC;
-}EtherCATDataGram;
+/*
+Node addressing
+*/
 
-extern void net_ethercat_send(void);
+/*
+EtherCAT command types
+*/
+
+#define NOP 	0 	// No Operation
+#define APRD 	1 	// Auto Increment Read
+#define APWR 	2 	// Auto Increment Write
+#define APRW 	3 	// Auto Increment Read Write
+#define FPRD 	4 	// Configured Address Read
+#define FPWR 	5 	// Configured Address Write
+#define FPRW 	6 	// Configured Address Read Write
+#define BRD 	7 	// Broadcast Read
+#define BWR 	8 	// Broadcast Write
+#define BRW 	9 	// Broadcast Read Write
+#define LRD 	10 	// Logical Memory Read
+#define LWR 	11 	// Logical Memory Write
+#define LRW 	12 	// Logical Memory Read Write
+#define ARMW 	13 	// Auto Increment Read Multiple Write
+
+extern void net_ethercat_example(void);
+extern void net_ethercat_send(u08*data, u16 len_of_data);
 
 #endif

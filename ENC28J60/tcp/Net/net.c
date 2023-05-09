@@ -466,7 +466,7 @@ extern bool net_check_enit(void){
 	return false;
 }
 
-extern void net_ethercat_example(u08* data, u16 len_of_data){
+extern void net_ethercat_example(void){
 	u08 buf[] = {
 		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, 0x00,0x00,0x00,0x00,0x88,0xA4,0x4E,0x10, 
 		0x0C,0x00,0x00,0x00,0x01,0x00,0x06,0x80, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -481,34 +481,47 @@ extern void net_ethercat_example(u08* data, u16 len_of_data){
 	enc28j60PacketSend(110, buf);
 }
 
-extern void net_ethercasend(void){
+extern void net_ethercat_send(u08*data, u16 len_of_data){
 	u16 dummy = 0;
-	u08 buf[200];
+	u08 buf[50];
+	u16 total_len;
 
 	// Ethernet Header
-	copy_arr(&buf[0], mac_pc, 6
+	copy_arr(&buf[0], mac_pc, 6);
 	copy_arr(&buf[6],  mac_addr, 6);
 	dummy =  0x88A4;
 	buf[12] = (dummy>>8)&0xFF;
 	buf[13] = dummy&0xFF;
+	
+	// EtherCAT Datagrams
+	buf[16] = LRW;								// Cmd
+	buf[17] = 0x0;								// Idx
+	// Address : address for logic memory r/w
+	buf[18]= 0x00; buf[19]= 0x00; buf[20]= 1000/256;buf[21]=1000%256;
+	// len-R-C-M
+	//  Last indicator: More EtherCAT datagrams will follow
+	dummy = (len_of_data&0x07FF)|(B000<<12)|(1<<14)|(0<<15);
+	buf[22] = (dummy>>8)&0xFF;
+	buf[23] = dummy&0xFF;
+	// IRQ
+	dummy = 0;
+	buf[24] = (dummy>>8)&0xFF;
+	buf[25] = dummy&0xFF;
+	copy_arr(&buf[26],  data, len_of_data);
+	
+	// Working Cnt
+	dummy = 0;
+	buf[26 + len_of_data] = (dummy>>8)&0xFF;
+	buf[27 + len_of_data] = dummy&0xFF;
+	
+	
 	// EtherCAT frame header
-	dummy =  (1<<12);
+	total_len = 12 + len_of_data;
+	dummy = (B0001<<12)|(0<<11)|(total_len);
 	buf[14] = (dummy>>8)&0xFF;
 	buf[15] = dummy&0xFF;
 	
-	// EtherCAT datagram
-	buf[16] = 0x03;								// CM
-	buf[17] = 0x0;								// Idx
-	
-	// len of data - R-C-M
-	dummy =  (len_of_data<<5)&0xFFFC + (0<<1) + (0<<0);
-	buf[22] = (dummy>>8)&0xFF;
-	buf[23] = dummy&0xFF;
-
-	copy_arr(&buf[24],  data, len_of_data);
-
-	buf[24 + len_of_data] = 0;
-	buf[25 + len_of_data] = 1;
+	enc28j60PacketSend(28 + len_of_data, buf);
 }
 
 

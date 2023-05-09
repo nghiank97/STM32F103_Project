@@ -31,6 +31,6 @@ extern void loop(void){
 		net_poll();
 		check = 0;
 	}
-	net_ethercat_send();
+	net_ethercat_send((u08*)"khac",5);
 	HAL_Delay(100);
 }
