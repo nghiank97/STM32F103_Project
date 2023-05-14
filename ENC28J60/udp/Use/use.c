@@ -11,13 +11,12 @@ extern void setup_io(void){
 #define LED_ON() 			{GPIOC->ODR &=~ (1<<13);}
 #define LED_TOGGLE() 	{GPIOC->ODR ^= (1<<13);}
 
-void enc28j60IntCallBack(void){
-	if(net_check_enit()){
-		net_poll();
-	}
-}
+u08 check = 0;
 
-void net_udp_handle(u08 num){
+void enc28j60IntCallBack(void){
+//	if(net_check_enit() && check == 0){
+//		check = 1;
+//	}
 }
 
 u08 _mymac[6] = {0x08,0x10,0x19,0x97,0x25,0x25};
@@ -31,5 +30,10 @@ extern void setup(void){
 }
 
 extern void loop(void){
-	delay_ms(100);
+//	if(check == 1){
+//		net_poll();
+//		check = 0;
+//	}
+	net_poll();
+	HAL_Delay(10);
 }

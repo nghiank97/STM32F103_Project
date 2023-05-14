@@ -52,14 +52,14 @@ void enc28j60ReadBuffer(u16 len, u08* data)
 
 void enc28j60WriteBuffer(u16 len, u08* data)
 	{
-//		u32 crc = crc32(data, 42);
+		u32 crc = crc32(data, 42);
 		ENC28J60_CSL();
 		SPI1_ReadWrite(ENC28J60_WRITE_BUF_MEM);
 		SPI1_Writes(data, len);
-//		SPI1_ReadWrite((crc&0xFF000000)>>24);
-//		SPI1_ReadWrite((crc&0x00FF0000)>>16);
-//		SPI1_ReadWrite((crc&0x0000FF00)>>8);
-//		SPI1_ReadWrite(crc&0x000000FF);
+		SPI1_ReadWrite((crc&0xFF000000)>>24);
+		SPI1_ReadWrite((crc&0x00FF0000)>>16);
+		SPI1_ReadWrite((crc&0x0000FF00)>>8);
+		SPI1_ReadWrite(crc&0x000000FF);
 		
 		ENC28J60_CSH();
 	}
@@ -236,14 +236,11 @@ void enc28j60PacketSend(u16 len, u08* packet)
 
 	// send the contents of the transmit buffer onto the network
 	enc28j60WriteOp(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_TXRTS);
-
-		LED_OFF();
     // reset the transmit logic problem. see rev. b4 silicon errata point 12.
 	if( (enc28j60Read(EIR) & EIR_TXERIF) )
 		{
         enc28j60WriteOp(ENC28J60_BIT_FIELD_CLR, ECON1, ECON1_TXRTS);
     }
-		LED_ON();
 	}
 
 // Gets a packet from the network receive buffer, if one is available.

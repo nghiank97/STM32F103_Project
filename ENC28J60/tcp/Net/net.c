@@ -1,4 +1,5 @@
 #include "main.h"
+#include "net.h"
 
 u16 source_port = 80;
 u08 mac_addr[6] = {0};
@@ -24,7 +25,7 @@ extern void net_init(u08 mymac[6], u08 myip[4], u16 myport, u08 ip_of_pc[4]){
 	copy_arr(mac_addr, mymac, 6);
 	copy_arr(ip_addr, myip, 4);
 	copy_arr(ip_pc, ip_of_pc, 4);
-	net_arp_get_mac_ip_pc(mac_pc, ip_pc, 100);
+	net_arp_get_mac_ip_pc(mac_pc, ip_pc, 500);
 	
 	// enable interrutps
 	enc28j60WriteOp(ENC28J60_BIT_FIELD_SET, EIE, EIE_INTIE|EIE_PKTIE);
@@ -41,19 +42,6 @@ extern bool net_poll(void){
 		return false;
 	}
 	else{
-		
-		
-#ifdef DEBUG
-	printf("\nReceive :");
-	for(u08 i=0;i<plen;i++){
-		if(i%16 == 0){
-			printf("\n");
-		}
-		printf("%02x ",rx_buf[i]);
-	}
-	printf("\n");
-#endif
-		
 		protocol = NONE;
 		rx_buf[plen] = '\0';
 		if(rx_buf[I_ARP_ETHERNET_TYPE_H] == 0x08 && \
@@ -69,9 +57,6 @@ extern bool net_poll(void){
 		switch (protocol){
 			case ARP:{
 				if (net_arp_check_broadcast((u08*)rx_buf, plen)){
-#ifdef DEBUG
-	printf("\nARP");
-#endif
 					copy_arr(mac_pc, &rx_buf[I_ARP_MAC_SENDER], 6);
 					copy_arr(ip_pc, &rx_buf[I_ARP_IP_SENDER], 4);
 					
@@ -82,9 +67,6 @@ extern bool net_poll(void){
 			}
 			case ICMP:{
 				if (net_icmp_check((u08*)rx_buf, plen)){
-#ifdef DEBUG
-	printf("\nICMP");
-#endif
 					net_icmp_reply((u08*)rx_buf, plen);
 					return true;
 				}
@@ -92,10 +74,6 @@ extern bool net_poll(void){
 			}
 			case TCP_IP:{
 				if (net_tcp_ip_check((u08*)rx_buf, plen)){
-					
-#ifdef DEBUG
-	printf("\nTCP IP");
-#endif
 					if(net_tcp_ip_reply((u08*)rx_buf, plen)){
 						net_tcp_ip_handle((u08*)rx_buf, plen);
 						return true;
@@ -192,13 +170,8 @@ extern bool net_arp_get_mac_ip_pc(u08 mac_target[6], u08 ip_target[4], u16 timeo
 					/* compare IP source */
 					if(com_arr(&data[I_ARP_IP_TARGET], (u08*)ip_addr, 4)){
 						copy_arr(mac_target, &data[I_ARP_MAC_SENDER], 6);
-						
 #ifdef DEBUG
-	printf("\nMAC :");
-	for(u08 i=0;i<6;i++){
-		printf("%02x ",mac_target[i]);
-	}
-	printf("\n");
+	printf("%02x %02x %02x %02x %02x %02x \n", mac_target[0], mac_target[1], mac_target[2], mac_target[3], mac_target[4], mac_target[5]);
 #endif
 						return true;
 					}
@@ -481,9 +454,9 @@ extern void net_ethercat_example(void){
 	enc28j60PacketSend(110, buf);
 }
 
-extern void net_ethercat_send(u08*data, u16 len_of_data){
+extern void net_ethercat_example2(u08*data, u16 len_of_data){
 	u16 dummy = 0;
-	u08 buf[50];
+	u08 buf[50] = {0};
 	u16 total_len;
 
 	// Ethernet Header
@@ -497,38 +470,158 @@ extern void net_ethercat_send(u08*data, u16 len_of_data){
 	buf[16] = LRW;								// Cmd
 	buf[17] = 0x0;								// Idx
 	// Address : address for logic memory r/w
-	buf[18]= 0x00; buf[19]= 0x00; buf[20]= 1000/256;buf[21]=1000%256;
+	buf[18]= 0x00;
+	buf[19]= 0x00;
+	buf[20]= 1000/256;
+	buf[21]= 1000%256;
 	// len-R-C-M
 	//  Last indicator: More EtherCAT datagrams will follow
+	dummy = 0;
 	dummy = (len_of_data&0x07FF)|(B000<<12)|(1<<14)|(0<<15);
-	buf[22] = (dummy>>8)&0xFF;
-	buf[23] = dummy&0xFF;
+	buf[22] = dummy&0xFF;
+	buf[23] = (dummy>>8)&0xFF;
 	// IRQ
 	dummy = 0;
-	buf[24] = (dummy>>8)&0xFF;
-	buf[25] = dummy&0xFF;
+	buf[24] = dummy&0xFF;
+	buf[25] = (dummy>>8)&0xFF;
 	copy_arr(&buf[26],  data, len_of_data);
 	
 	// Working Cnt
 	dummy = 0;
-	buf[26 + len_of_data] = (dummy>>8)&0xFF;
-	buf[27 + len_of_data] = dummy&0xFF;
-	
+	buf[27 + len_of_data] = (dummy>>8)&0xFF;
+	buf[28 + len_of_data] = dummy&0xFF;
 	
 	// EtherCAT frame header
 	total_len = 12 + len_of_data;
-	dummy = (B0001<<12)|(0<<11)|(total_len);
-	buf[14] = (dummy>>8)&0xFF;
-	buf[15] = dummy&0xFF;
+	dummy = (B0001<<12)|(0<<11) + (total_len);
 	
-	enc28j60PacketSend(28 + len_of_data, buf);
+	buf[14] = dummy&0xFF;
+	buf[15] = (dummy>>8)&0xFF;
+	
+	enc28j60PacketSend(29 + len_of_data, buf);
 }
 
+extern u16 net_ethercat_load_datagram(u08* dest,u08 cmd, u08 idx, u32 add, u16 RCM, u16 IRQ, u16 workingcount, u08* data, u16 len){
+	// Cmd
+	dest[0] = cmd;
+	// Idx
+	dest[1] = idx;
+	// Address : address for logic memory r/w
+	dest[2]= (add&0x0000FFFF)%256;
+	dest[3]= (add&0x0000FFFF)/256;
+	dest[4]= ((add&0xFFFF0000)>>16)/256;
+	dest[5]= ((add&0xFFFF0000)>>16)%256;
+	// len-R-C-M
+	//  Last indicator: More EtherCAT datagrams will follow
+	RCM = RCM + (len&0x07FF);
+	dest[6] = RCM&0xFF;
+	dest[7] = (RCM>>8)&0xFF;
+	// IRQ
+	dest[8] = IRQ&0xFF;
+	dest[9] = (IRQ>>8)&0xFF;
+	copy_arr(&dest[10],  data, len);
+	// Working Cnt
+	dest[10 + len] = (workingcount>>8)&0xFF;
+	dest[11 + len] = workingcount&0xFF;
+	return 12 + len;
+}
 
+extern void net_ethercat_send(void){
+	u16 dummy = 0;
+	u08 buf[100] = {0};
+	u16 index = 0;
 
+	// Ethernet Header
+	copy_arr(&buf[0], mac_pc, 6);
+	copy_arr(&buf[6],  mac_addr, 6);
+	dummy =  0x88A4;
+	buf[12] = (dummy>>8)&0xFF;
+	buf[13] = dummy&0xFF;
+	// EtherCAT Datagrams
+	index = 16;
+	index += net_ethercat_load_datagram(&buf[index],LRW, 0x01, 1000, (1<<15)|(1<<14)|(B000<<12), 0, 0, (u08*)"nguyen",6);
+	index += net_ethercat_load_datagram(&buf[index],LWR, 0x02, 2000, (0<<15)|(1<<14)|(B000<<12), 0, 1, (u08*)"khac",4);
+	
+	// EtherCAT frame header
+	dummy = (B0001<<12)|(0<<11) + (index - 16);
+	buf[14] = dummy&0xFF;
+	buf[15] = (dummy>>8)&0xFF;
 
+	enc28j60PacketSend(index, buf);
+}
 
+extern void net_udp_ethercat_send(void){
+	u16 dummy = 0;
+	u16 index = 0;
+	u16 len_of_data = 0;
+	u08 buf[100] = {0};
+	
+	index = 44;
+	index += net_ethercat_load_datagram(&buf[index],LRW, 0x01, 1000, (1<<15)|(1<<14)|(B000<<12), 0, 0, (u08*)"nguyen",6);
+	index += net_ethercat_load_datagram(&buf[index],LWR, 0x02, 2000, (0<<15)|(1<<14)|(B000<<12), 0, 0, (u08*)"khac",4);
+	len_of_data = index - 42;
+	
+	// EtherCAT frame header
+	dummy = (B0001<<12)|(0<<11)+(index-42);
+	buf[42] = dummy&0xFF;
+	buf[43] = (dummy>>8)&0xFF;
+	
+	/* Ethernet header */
+	copy_arr(&buf[0], mac_pc, 6);
+	copy_arr(&buf[6], mac_addr, 6);
+	buf[12] = 0x0800/256;
+	buf[13] = 0x0800%256;
+	/* IP */
+	buf[12] = 0x0800/256;
+	buf[13] = 0x0800%256;
+	/* IP */
+	buf[14] = 0x45;
+	buf[15] = 0;
+	// total length
+	buf[16] = (index-14)/256;
+	buf[17] = (index-14)%256;
+	// ip destination
+	buf[18] = 0x1234/256;
+	buf[19] = 0x1234%256;
+	// flags
+	buf[20] = 0x0000/256;
+	buf[21] = 0x0000%256;
+	// time to live
+	buf[22] = 128;
+	// UDP
+	buf[23] = 17;
+	// ip source
+	copy_arr(&buf[26], ip_addr, 4);
+	// ip destination
+	copy_arr(&buf[30], ip_pc, 4);
+	
+	// checksum
+	dummy = ipv4_checksum(&buf[14], IPV4_SIZE);
+	buf[24] = dummy%256;
+	buf[25] = dummy/256;
 
+	// source port
+	buf[34] = 5002/256;
+	buf[35] = 5002%256;
+	// destination port
+	buf[36] = 0x88A4/256;
+	buf[37] = 0x88A4%256;
+	// udp lenght
+	buf[38] = (UDP_SIZE + len_of_data)/256;
+	buf[39] = (UDP_SIZE + len_of_data)%256;
+	dummy = udp_checksum(&buf[26],UDP_SIZE + len_of_data + 8);
+	buf[40] = dummy%256;
+	buf[41] = dummy/256;
+	
+	printf("\n");
+	for(u16 i=0;i<index;i++){
+		if(i%16 == 0){
+			printf("\n");
+		}
+		printf("%02x ",buf[i]);
+	}
+	enc28j60PacketSend(index, &buf[0]);	
+}
 
 
 

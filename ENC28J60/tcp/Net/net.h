@@ -129,6 +129,44 @@ extern bool net_arp_get_mac_ip_pc(u08 mac_target[6], u08 ip_target[4], u16 timeo
 #define IPV4_ICMP_SIZE				42
 #define ICMP_SIZE							8
 
+/* UDP */
+#define I_UDP_SRC_PORT_H 		34 // 0x22
+#define I_UDP_SRC_PORT_L 		35 // 0x22
+#define I_UDP_DST_PORT_H 		36 // 0x24
+#define I_UDP_DST_PORT_L 		37 // 0x24
+#define I_UDP_LEN_H 			38 // 0x26
+#define I_UDP_LEN_L 			39 // 0x26
+#define I_UDP_CHECKSUM_H 		40 // 0x28
+#define I_UDP_CHECKSUM_L 		41 // 0x28
+#define I_UDP_DATA 				42 // 0x2A
+#define UDP_SIZE					8
+typedef struct{
+	/* It is Ethernet Frame II */
+	u08 MAC_dest[6];
+	u08 MAC_source[6];
+	u16 Ethernet_type;
+	/* IP */
+	u08 Header_length; 
+	u08 Services;
+	/* Total length
+		Form: Header_length - Data
+	*/
+	u16 TotalLength;
+	u16 Identification;
+	u16 Flag;
+	u08 TimeToLive;
+	u08 Protocol;
+	u16 CheckSum;
+	u08 SourceIP[4];
+	u08 DestIP[4];
+	/* UDP */
+  u16 UDP_Source_Port;
+  u16 UDP_Dest_Port;
+  u16 UDP_Length;
+  u16 UDP_Checksum;
+}UDP_Frame;
+
+
 typedef struct{
 	/* It is Ethernet Frame II */
 	u08 MAC_dest[6];
@@ -273,6 +311,7 @@ EtherCAT command types
 #define ARMW 	13 	// Auto Increment Read Multiple Write
 
 extern void net_ethercat_example(void);
-extern void net_ethercat_send(u08*data, u16 len_of_data);
-
+extern void net_ethercat_example2(u08* data, u16 len_of_data);
+extern void net_ethercat_send(void);
+extern void net_udp_ethercat_send(void);
 #endif

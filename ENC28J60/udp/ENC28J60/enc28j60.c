@@ -44,14 +44,7 @@ void enc28j60ReadBuffer(u16 len, u08* data)
 		ENC28J60_CSL();
 		// issue read command
 		SPI1_ReadWrite(ENC28J60_READ_BUF_MEM);
-		while(len)
-			{
-					len--;
-					// read data
-					*data = (u08)SPI1_ReadWrite(0);
-					data++;
-			}
-		*data='\0';
+		SPI1_ReadPage(data, len);
 		ENC28J60_CSH();
 	}
 
@@ -60,11 +53,7 @@ void enc28j60WriteBuffer(u16 len, u08* data)
 //		u32 crc = crc32(data, 42);
 		ENC28J60_CSL();
 		SPI1_ReadWrite(ENC28J60_WRITE_BUF_MEM);
-		while(len){
-			len--;
-			SPI1_ReadWrite(*data);
-			data++;
-		}
+		SPI1_WritePage(data, len);
 //		SPI1_ReadWrite((crc&0xFF000000)>>24);
 //		SPI1_ReadWrite((crc&0x00FF0000)>>16);
 //		SPI1_ReadWrite((crc&0x0000FF00)>>8);

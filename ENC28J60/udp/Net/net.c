@@ -49,6 +49,16 @@ extern bool net_poll(void){
 		return false;
 	}
 	else{
+		
+#ifdef DEBUG
+//		for(u16 i=0;i<plen;i++){
+//			if(i%16 ==0){
+//				printf("\n");
+//			}
+//			printf("%02x ", rx_buf[i]);
+//		}
+#endif
+		
 		protocol = NONE;
 		rx_buf[plen] = '\0';
 		if(rx_buf[I_ARP_ETHERNET_TYPE_H] == 0x08 && \
@@ -174,6 +184,11 @@ extern bool net_arp_get_mac_ip_pc(u08 mac_target[6], u08 ip_target[4], u16 timeo
 					/* compare IP source */
 					if(com_arr(&data[I_ARP_IP_TARGET], (u08*)ip_addr, 4)){
 						copy_arr(mac_target, &data[I_ARP_MAC_SENDER], 6);
+						
+#ifdef DEBUG
+	printf("%02x %02x %02x %02x %02x %02x \n", mac_target[0], mac_target[1], mac_target[2], mac_target[3], mac_target[4], mac_target[5]);
+#endif
+						
 						return true;
 					}
 				}
@@ -297,6 +312,7 @@ extern void net_udp_reply(u08* data, u16 len){
 	if (com_arr(&data[I_UDP_DATA], (u08*)"LED13=HIGH\r\n", 12)){
 		net_udp_handle(0);
 		net_udp_request(data, len, (u08*)"LED13=HIGH\r\n", 12);
+		
 	}
 	else if (com_arr(&data[I_UDP_DATA], (u08*)"LED13=LOW\r\n", 11)){
 		net_udp_handle(1);
@@ -314,9 +330,7 @@ extern void net_udp_request(u08* request, u08 len, u08* data, u16 len_of_data){
 	
 	copy_arr(udp_struct.MAC_dest, &request[6], 6);
 	copy_arr(udp_struct.MAC_source, &request[0], 6);
-	
-	udp_struct.CheckSum = 0x0000;
-	udp_struct.CheckSum = ipv4_checksum((u08 *)&udp_struct.Header_length, IPV4_SIZE);
+
 	udp_struct.TotalLength = swap16(IPV4_SIZE + UDP_SIZE	+ len_of_data);
 	udp_struct.CheckSum = 0x0000;
 	udp_struct.CheckSum = ipv4_checksum((u08 *)&udp_struct.Header_length, IPV4_SIZE);
@@ -334,5 +348,74 @@ extern void net_udp_request(u08* request, u08 len, u08* data, u16 len_of_data){
 	enc28j60PacketSend(I_UDP_DATA + len_of_data, (u08*)&udp_struct);	
 }
 
+extern void net_udp_test(u08* request, u08 len, u08* data, u16 len_of_data){
+	u16 dummy = 0;
+	u16 index = 42+len_of_data;
+	u08 buf[100] = {0};
+	
+	copy_arr(&buf[0], mac_pc, 6);
+	copy_arr(&buf[6], mac_addr, 6);
+	
+	buf[12] = 0x0800/256;
+	buf[13] = 0x0800%256;
+	/* IP */
+	buf[14] = 0x45;
+	buf[15] = 0;
+	// total length
+	buf[16] = (index-14)/256;
+	buf[17] = (index-14)%256;
+	// ip destination
+	buf[18] = request[18];
+	buf[19] = request[19];
+	// flags
+	buf[20] = 0x0000/256;
+	buf[21] = 0x0000%256;
+	// time to live
+	buf[22] = 128;
+	// UDP
+	buf[23] = 17;
+	// ip source
+	copy_arr(&buf[26], ip_addr, 4);
+	// ip destination
+	copy_arr(&buf[30], ip_pc, 4);
+	
+	// checksum
+	dummy = ipv4_checksum(&buf[14], IPV4_SIZE);
+	buf[24] = dummy%256;
+	buf[25] = dummy/256;
+
+	// source port
+	buf[34] = source_port/256;
+	buf[35] = source_port%256;
+	// destination port
+	buf[36] = request[I_UDP_SRC_PORT_H];
+	buf[37] = request[I_UDP_SRC_PORT_L];
+	// udp lenght
+	buf[38] = (UDP_SIZE + len_of_data)/256;
+	buf[39] = (UDP_SIZE + len_of_data)%256;
+	copy_arr(&buf[42], data, len_of_data);
+	dummy = udp_checksum(&buf[26],UDP_SIZE + len_of_data + 8);
+	buf[40] = dummy%256;
+	buf[41] = dummy/256;
+	
+	printf("\n");
+	for(u16 i=0;i<index;i++){
+		if(i%16 == 0){
+			printf("\n");
+		}
+		printf("%02x ",buf[i]);
+	}
+	enc28j60PacketSend(index, &buf[0]);	
+}
 
 __weak void net_udp_handle(u08 num){}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

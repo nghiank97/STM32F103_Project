@@ -10,16 +10,16 @@ extern void setup_io(void){
 int check = 0;
 
 void enc28j60IntCallBack(void){
-	if(net_check_enit() && check == 0){
-		check = 1;
-		return;
-	}
+//	if(net_check_enit() && check == 0){
+//		check = 1;
+//		return;
+//	}
 }
 
 u08 _mymac[6] = {0x08,0x10,0x19,0x97,0x25,0x25};
-u08 _myip[4] =  {192,168,7,133};       
+u08 _myip[4] =  {192,168,137,100};       
 u16 _myport = 80;
-u08 _ip_of_pc[4] =  {192,168,7,1};    
+u08 _ip_of_pc[4] =  {192,168,137,10};    
 
 extern void setup(void){
 	setup_io();
@@ -27,10 +27,12 @@ extern void setup(void){
 }
 
 extern void loop(void){
-	if (check == 1){
-		net_poll();
-		check = 0;
-	}
-	net_ethercat_send((u08*)"khac",5);
+//	if (check == 1){
+//		net_poll();
+//		check = 0;
+//	}
+	
+	net_poll();
+	net_udp_ethercat_send();
 	HAL_Delay(100);
 }

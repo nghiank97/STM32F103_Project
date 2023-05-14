@@ -205,5 +205,6 @@ typedef struct{
 extern bool net_udp_check(u08* request, u16 len);
 extern void net_udp_reply(u08* data, u16 len);
 extern void net_udp_request(u08* request, u08 len, u08* data, u16 len_of_data);
+extern void net_udp_test(u08* request, u08 len, u08* data, u16 len_of_data);
 __weak void net_udp_handle(u08 num);
 #endif
