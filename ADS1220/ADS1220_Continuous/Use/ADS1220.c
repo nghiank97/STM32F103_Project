@@ -14,10 +14,10 @@ void delay_us(void)
 
 void ads1220_write_reg(u08 address, u08 value){
     ads1220_cs_low();
-    //delay_us;
+    delay_us();
     spi1_write(WREG|(address<<2));
     spi1_write(value);
-    //delay_us;
+    delay_us();
     ads1220_cs_high();
 }
 
@@ -55,8 +55,8 @@ void ads1220_begin(){
     /******************** Configuration Register 1 ********************/
 
     m_config_reg1 =
-    		(0b110<<5)|		// DR= 1000SPS
-    		(0b00<<3)|		// Mode= Normal
+    		(0b110<<5)|		// DR= 2000SPS
+    		(0b10<<3)|		// Mode= Normal
 			(0b1<<2)|		// Conv mode=continuous
 			(0b0<<1)|		// Temp Sensor disabled
 			(0b0<<0);		// Current Source off
@@ -71,7 +71,7 @@ void ads1220_begin(){
 
     /******************** Configuration Register 3 ********************/
 
-    m_config_reg3 = 0x00;   		// IDAC1 disabled, IDAC2 disabled, DRDY pin only
+    m_config_reg3 = 0x00;   // IDAC1 disabled, IDAC2 disabled, DRDY pin only
 
     ads1220_write_reg( CONFIG_REG0_ADDRESS , m_config_reg0);delay_ms(1);
     ads1220_write_reg( CONFIG_REG1_ADDRESS , m_config_reg1);delay_ms(1);
@@ -85,7 +85,8 @@ void ads1220_begin(){
 	// Enable PA3 CLock : input pullup
 	RCC->APB2ENR |= (1<<2);
 	GPIOA->CRL &=~ 0x0000F000;
-	GPIOA->CRL |= 0x000008000;
+	GPIOA->CRL |=  0x00008000;
+
 	// enable the AFIO clock
 	RCC->APB2ENR |= (1<<0);
 	// Configure EXTI1 line for PA3
@@ -138,10 +139,10 @@ u08 ads1220_read_drdy(){
 i32 ads1220_read_continuous(){
 	u08 rx[3] = {0};
 	i32 result = 0;
-
-	rx[0] = spi1_transfer(0);
-	rx[1] = spi1_transfer(0);
-	rx[2] = spi1_transfer(0);
+	spi1_transfer(0x00);
+	rx[0] = spi1_transfer(0x00);
+	rx[1] = spi1_transfer(0x00);
+	rx[2] = spi1_transfer(0x00);
 
     result = rx[0];
     result = (result << 8) | rx[1];

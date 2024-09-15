@@ -4,8 +4,7 @@
 
 i32 raw = 0;
 
-void EXTI3_IRQHandler(void)
-{
+void EXTI3_IRQHandler(void){
 	if (EXTI->PR & (1<<3)){
 		if (!ads1220_read_drdy()){
 			raw = ads1220_read_continuous();
@@ -21,10 +20,8 @@ extern void setup()
     delay_ms(1);
 }
 
-
 extern void loop()
 {
 	printf("raw : %ld\r\n",raw);
 	delay_ms(10);
 }
-
